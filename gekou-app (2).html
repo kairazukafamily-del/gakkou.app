@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="下校タイマー">
+<title>下校タイマー</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --accent: #F07A5A;
+    --accent-light: #FFE8E0;
+    --mint: #5DCAA5;
+    --mint-light: #E1F5EEE;
+    --amber: #EF9F27;
+    --amber-light: #FFF3E0;
+    --bg: #FFF9F6;
+    --card: #FFFFFF;
+    --border: #F0E4DC;
+    --text: #3A2E2A;
+    --muted: #BBA8A2;
+    --placeholder: #D4C4BE;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
+  .header { background: var(--accent); padding: 52px 20px 20px; color: #fff; }
+  .header h1 { font-size: 22px; font-weight: 600; }
+  .header p { font-size: 13px; opacity: 0.85; margin-top: 3px; }
+  .tabnav { display: flex; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  .tab { flex: 1; padding: 13px 0; text-align: center; font-size: 14px; color: var(--muted); border: none; background: none; border-bottom: 2.5px solid transparent; cursor: pointer; }
+  .tab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .screen { display: none; padding: 16px 16px 48px; }
+  .screen.on { display: block; }
+  .hint { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+  .pcard { background: var(--card); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .pdot { width: 44px; height: 44px; border-radius: 13px; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .pdot.b { background: #E1F5EE; color: #0F6E56; }
+  .pdot.c { background: var(--amber-light); color: #854F0B; }
+  .pinfo { flex: 1; }
+  .plabel { font-size: 11px; color: var(--muted); }
+  .ptime { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-top: 1px; }
+  .edit-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .add-btn { width: 100%; padding: 14px; background: none; border: 1.5px dashed #E0D0CA; border-radius: 16px; color: var(--muted); font-size: 14px; cursor: pointer; margin-top: 4px; }
+  .week-card { background: var(--card); border-radius: 16px; border: 1.5px solid var(--border); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .warrow { width: 42px; height: 42px; border-radius: 12px; background: var(--bg); border: 1.5px solid var(--border); font-size: 24px; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .warrow:active { background: var(--border); }
+  .wcenter { text-align: center; flex: 1; }
+  .wdate { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; display: block; }
+  .wrel { font-size: 12px; font-weight: 600; margin-top: 3px; display: block; color: var(--accent); }
+  .wrel.gray { color: var(--muted); font-weight: 400; }
+  .prev-btn { width: 100%; font-size: 13px; color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px; cursor: pointer; margin-bottom: 12px; }
+  .prev-btn.ok { color: var(--mint); border-color: var(--mint); }
+  .dayrow { background: var(--card); border-radius: 16px; padding: 13px 15px; margin-bottom: 9px; border: 1.5px solid var(--border); }
+  .dayrow:focus-within { border-color: #F0B8A8; }
+  .dlabel { font-size: 11px; color: var(--muted); margin-bottom: 9px; font-weight: 500; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+  .chip { padding: 8px 13px; border-radius: 22px; font-size: 14px; border: 1.5px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .chip.ona { background: var(--accent-light); border-color: var(--accent); color: #B05040; font-weight: 600; }
+  .chip.onb { background: #E1F5EE; border-color: var(--mint); color: #0F6E56; font-weight: 600; }
+  .chip.onc { background: var(--amber-light); border-color: var(--amber); color: #854F0B; font-weight: 600; }
+  .memo { width: 100%; border: none; background: transparent; font-size: 13px; color: #8A7A74; outline: none; padding: 9px 0 1px; margin-top: 8px; border-top: 1px dashed var(--border); font-family: inherit; }
+  .memo::placeholder { color: var(--placeholder); }
+  .sendbtn { width: 100%; padding: 17px; background: var(--accent); color: #FFFFFF; border: none; border-radius: 18px; font-size: 16px; font-weight: 700; cursor: pointer; display: block; margin-top: 4px; }
+  .sendbtn:active { opacity: 0.88; }
+  .sendbtn.ok { background: var(--mint); }
+  .sendhint { font-size: 11px; color: var(--muted); text-align: center; margin-top: 9px; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(58,46,42,0.4); z-index: 100; align-items: flex-end; justify-content: center; }
+  .overlay.on { display: flex; }
+  .modal { background: var(--card); width: 100%; max-width: 480px; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; }
+  .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
+  .modal label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .modal input[type=text], .modal input[type=time] { width: 100%; padding: 13px 15px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-size: 17px; color: var(--text); outline: none; font-family: inherit; margin-bottom: 16px; }
+  .modal input:focus { border-color: var(--accent); }
+  .crow { display: flex; gap: 10px; margin-bottom: 20px; }
+  .copt { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid transparent; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .copt.a { background: var(--accent-light); color: var(--accent); }
+  .copt.b { background: #E1F5EE; color: #0F6E56; }
+  .copt.c { background: var(--amber-light); color: #854F0B; }
+  .copt.sel { border-color: currentColor; }
+  .mbtns { display: flex; gap: 10px; }
+  .mcancel { flex: 1; padding: 14px; border-radius: 14px; background: var(--bg); border: 1.5px solid var(--border); font-size: 15px; color: var(--muted); cursor: pointer; }
+  .msave { flex: 2; padding: 14px; border-radius: 14px; background: var(--accent); border: none; font-size: 15px; color: #fff; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>下校タイマー</h1>
+  <p>小学校の下校時間をかんたん管理</p>
+</div>
+<div class="tabnav">
+  <button class="tab on" onclick="switchTab('s1',this)">パターン設定</button>
+  <button class="tab" onclick="switchTab('s2',this)">今週の入力</button>
+</div>
+<div id="s1" class="screen on">
+  <p class="hint">よく使う下校時間を登録しておくと、毎週の入力がタップだけで完了します。</p>
+  <div id="plist"></div>
+  <button class="add-btn" onclick="openAdd()">＋ パターンを追加</button>
+</div>
+<div id="s2" class="screen">
+  <div class="week-card">
+    <button class="warrow" onclick="changeWeek(-1)">&#8249;</button>
+    <div class="wcenter">
+      <span class="wdate" id="wdate">-</span>
+      <span class="wrel" id="wrel">今週</span>
+    </div>
+    <button class="warrow" onclick="changeWeek(1)">&#8250;</button>
+  </div>
+  <button class="prev-btn" id="prevbtn" onclick="copyPrev()">先週と同じにする</button>
+  <div id="drows"></div>
+  <button class="sendbtn" id="sendbtn" onclick="send()">カレンダーへ一括送る</button>
+  <p class="sendhint">Google / iPhoneカレンダー両対応</p>
+</div>
+<div class="overlay" id="ov" onclick="closeOv(event)">
+  <div class="modal">
+    <h3 id="mtitle">パターンを追加</h3>
+    <label>ラベル</label>
+    <input type="text" id="mlabel" placeholder="例：普通授業、短縮">
+    <label>下校時間</label>
+    <input type="time" id="mtime" value="14:30">
+    <label>色</label>
+    <div class="crow">
+      <div class="copt a sel" onclick="selCol('a',this)">A</div>
+      <div class="copt b" onclick="selCol('b',this)">B</div>
+      <div class="copt c" onclick="selCol('c',this)">C</div>
+    </div>
+    <div class="mbtns">
+      <button class="mcancel" onclick="closeOvDirect()">キャンセル</button>
+      <button class="msave" onclick="savePat()">保存する</button>
+    </div>
+  </div>
+</div>
+<script>
+var DAYS = ['月曜日','火曜日','水曜日','木曜日','金曜日'];
+var DKEYS = ['mon','tue','wed','thu','fri'];
+var pats = [
+  {id:'A',label:'普通授業',time:'14:30',color:'a'},
+  {id:'B',label:'短縮授業',time:'13:00',color:'b'},
+  {id:'C',label:'早帰り',time:'12:15',color:'c'}
+];
+var offset = 0;
+var store = {};
+var editIdx = null;
+var col = 'a';
+
+function key() { return 'w'+offset; }
+function wd() {
+  if (!store[key()]) store[key()] = {sel:{mon:null,tue:null,wed:null,thu:null,fri:null},memo:{mon:'',tue:'',wed:'',thu:'',fri:''}};
+  return store[key()];
+}
+function getMon(off) {
+  var now = new Date();
+  var day = now.getDay() || 7;
+  var mon = new Date(now);
+  mon.setDate(now.getDate() - day + 1 + off * 7);
+  mon.setHours(0,0,0,0);
+  return mon;
+}
+function fmt(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
+function changeWeek(dir) { offset += dir; renderWeek(); }
+function switchTab(id, btn) {
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+  if (id==='s2') renderWeek();
+}
+function renderWeek() {
+  var mon = getMon(offset);
+  var fri = new Date(mon); fri.setDate(mon.getDate()+4);
+  document.getElementById('wdate').textContent = fmt(mon)+' 〜 '+fmt(fri);
+  var relEl = document.getElementById('wrel');
+  var rel = offset===0?'今週':offset===1?'来週':offset===-1?'先週':offset>0?offset+'週間後':Math.abs(offset)+'週間前';
+  relEl.textContent = rel;
+  relEl.className = 'wrel'+(offset===0?'':' gray');
+  var d = wd();
+  var cont = document.getElementById('drows');
+  cont.innerHTML = '';
+  DKEYS.forEach(function(k,i) {
+    var row = document.createElement('div');
+    row.className = 'dayrow';
+    var chips = pats.map(function(p) {
+      var on = d.sel[k]===p.id?' on'+p.color:'';
+      return '<div class="chip'+on+'" onclick="selDay(\''+k+'\',\''+p.id+'\',this)">'+p.id+'&emsp;'+p.time+'</div>';
+    }).join('');
+    var m = (d.memo[k]||'').replace(/"/g,'&quot;');
+    row.innerHTML = '<div class="dlabel">'+DAYS[i]+'</div><div class="chips">'+chips+'</div><input class="memo" type="text" placeholder="メモ（任意）" value="'+m+'" oninput="saveMemo(\''+k+'\',this.value)">';
+    cont.appendChild(row);
+  });
+}
+function selDay(k, pid, el) {
+  wd().sel[k] = pid;
+  el.parentElement.querySelectorAll('.chip').forEach(function(c){c.classList.remove('ona','onb','onc');});
+  var p = pats.find(function(x){return x.id===pid;});
+  el.classList.add('on'+p.color);
+}
+function saveMemo(k, v) { wd().memo[k] = v; }
+function copyPrev() {
+  var btn = document.getElementById('prevbtn');
+  var prev = store['w'+(offset-1)];
+  if (prev) {
+    store[key()] = JSON.parse(JSON.stringify(prev));
+    renderWeek();
+    btn.textContent = '読み込みました';
+    btn.classList.add('ok');
+    setTimeout(function(){btn.textContent='先週と同じにする';btn.classList.remove('ok');},2000);
+  } else {
+    btn.textContent = '前の週のデータなし';
+    setTimeout(function(){btn.textContent='先週と同じにする';},2000);
+  }
+}
+function send() {
+  var btn = document.getElementById('sendbtn');
+  var d = wd();
+  var mon = getMon(offset);
+  var ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//下校タイマー//JP\r\nCALSCALE:GREGORIAN\r\n';
+  var cnt = 0;
+  DKEYS.forEach(function(k,i) {
+    var pid = d.sel[k]; if (!pid) return;
+    var p = pats.find(function(x){return x.id===pid;}); if (!p) return;
+    var date = new Date(mon); date.setDate(mon.getDate()+i);
+    var parts = p.time.split(':');
+    var st = new Date(date); st.setHours(+parts[0],+parts[1],0);
+    var en = new Date(st); en.setMinutes(en.getMinutes()+30);
+    var f = function(dt){ return dt.getFullYear()+('0'+(dt.getMonth()+1)).slice(-2)+('0'+dt.getDate()).slice(-2)+'T'+('0'+dt.getHours()).slice(-2)+('0'+dt.getMinutes()).slice(-2)+'00'; };
+    var memo = d.memo[k] ? '\\n'+d.memo[k] : '';
+    ics += 'BEGIN:VEVENT\r\nSUMMARY:下校 '+p.time+'（'+p.label+'）\r\nDTSTART:'+f(st)+'\r\nDTEND:'+f(en)+'\r\nDESCRIPTION:'+p.label+memo+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nACTION:DISPLAY\r\nDESCRIPTION:もうすぐ下校時間です\r\nEND:VALARM\r\nEND:VEVENT\r\n';
+    cnt++;
+  });
+  ics += 'END:VCALENDAR';
+  if (cnt===0) { btn.textContent='曜日を選んでください'; setTimeout(function(){btn.textContent='カレンダーへ一括送る';},2000); return; }
+  window.location.href = 'data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
+  btn.textContent = cnt+'件 送信しました！';
+  btn.classList.add('ok');
+  setTimeout(function(){btn.textContent='カレンダーへ一括送る';btn.classList.remove('ok');},3000);
+}
+function renderPats() {
+  document.getElementById('plist').innerHTML = pats.map(function(p,i){
+    return '<div class="pcard"><div class="pdot '+( p.color==='a'?'':p.color )+'">'+p.id+'</div><div class="pinfo"><div class="plabel">'+p.label+'</div><div class="ptime">'+p.time+'</div></div><button class="edit-btn" onclick="openEdit('+i+')">…</button></div>';
+  }).join('');
+}
+function openAdd() {
+  editIdx = null;
+  document.getElementById('mtitle').textContent = 'パターンを追加';
+  document.getElementById('mlabel').value = '';
+  document.getElementById('mtime').value = '14:30';
+  col = 'a';
+  document.querySelectorAll('.copt').forEach(function(o){o.classList.remove('sel');});
+  document.querySelector('.copt.a').classList.add('sel');
+  document.getElementById('ov').classList.add('on');
+}
+function openEdit(idx) {
+  editIdx = idx; var p = pats[idx];
+  document.getElementById('mtitle').textContent = 'パターンを編集';
+  document.getElementById('mlabel').value = p.label;
+  document.getElementById('mtime').value = p.time;
+  col = p.color;
+  document.querySelectorAll('.copt').forEach(function(o){o.classList.remove('sel');});
+  document.querySelector('.copt.'+p.color).classList.add('sel');
+  document.getElementById('ov').classList.add('on');
+}
+function selCol(c, el) {
+  col = c;
+  document.querySelectorAll('.copt').forEach(function(o){o.classList.remove('sel');});
+  el.classList.add('sel');
+}
+function savePat() {
+  var label = document.getElementById('mlabel').value.trim() || 'パターン';
+  var time = document.getElementById('mtime').value || '14:30';
+  var ids = 'ABCDEFGH';
+  if (editIdx !== null) {
+    pats[editIdx] = {id:pats[editIdx].id, label:label, time:time, color:col};
+  } else {
+    pats.push({id:ids[pats.length]||'X', label:label, time:time, color:col});
+  }
+  closeOvDirect(); renderPats();
+}
+function closeOv(e) { if (e.target===document.getElementById('ov')) closeOvDirect(); }
+function closeOvDirect() { document.getElementById('ov').classList.remove('on'); }
+renderPats(); renderWeek();
+</script>
+</body>
+</html>

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="下校タイマー">
-<title>下校タイマー</title>
+<meta name="apple-mobile-web-app-title" content="下校カレンダー">
+<title>下校カレンダー</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
@@ -113,8 +113,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 <body>
 
 <div class="header">
-  <h1>下校タイマー</h1>
-  <p>小学校の下校時間をかんたん管理</p>
+  <h1>下校カレンダー</h1>
 </div>
 
 <div class="tabnav">
@@ -131,7 +130,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
   <div id="plist"></div>
   <button class="add-btn" onclick="openPatAdd()">＋ パターンを追加</button>
   <p class="hint" style="margin-top:16px">最初に一度だけ設定すればOK</p>
-  <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">設定をリセット（デフォルトに戻す）</button>
+  <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">子供の設定をリセット（デフォルトに戻す）</button>
 </div>
 
 <!-- Week -->
@@ -144,10 +143,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
     </div>
     <button class="warrow" onclick="changeWeek(1)">&#8250;</button>
   </div>
-  <button class="reset-btn" onclick="resetWeek()">今週をリセット</button>
   <div id="drows"></div>
   <button class="sendbtn" id="sendbtn" onclick="sendCal()">iPhoneカレンダーへ送る</button>
-  <p class="sendhint">iPhoneカレンダーに一括登録</p>
+  <button class="reset-btn" style="color:#C06060;margin-top:12px;" onclick="resetWeek()">今週の設定をリセット（デフォルトに戻す）</button>
 </div>
 
 <!-- Child modal -->
@@ -268,7 +266,7 @@ function renderSettings(){
     var card=document.createElement('div');
     card.className='pcard';
     card.innerHTML='<div class="pdot '+(p.pcol==='a'?'':p.pcol)+'">'+p.id+'</div>'+
-      '<div class="pinfo"><div class="plabel">'+p.label+(p.note?' · '+p.note:'')+'</div><div class="ptime">'+p.time+'</div></div>';
+      '<div class="pinfo"><div class="plabel">'+p.label+(p.note?' · '+p.note:'')+'</div><div class="ptime">'+zen(p.time)+'</div></div>';
     var btn=document.createElement('button');
     btn.className='edit-btn';
     btn.textContent='…';
@@ -298,7 +296,8 @@ function renderWeek(){
 
     var dlabel=document.createElement('div');
     dlabel.className='dlabel';
-    dlabel.textContent=DAYS_LABEL[di];
+    var dayDate=new Date(mon); dayDate.setDate(mon.getDate()+di);
+    dlabel.textContent=DAYS_LABEL[di]+'　'+(dayDate.getMonth()+1)+'/'+dayDate.getDate();
     row.appendChild(dlabel);
 
     children.forEach(function(c){

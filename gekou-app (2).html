@@ -79,6 +79,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 .memo { width: 100%; border: none; background: transparent; font-size: 13px; color: #8A7A74; outline: none; padding: 9px 0 1px; margin-top: 8px; border-top: 1px dashed var(--border); font-family: inherit; }
 .memo::placeholder { color: var(--placeholder); }
 
+.reset-btn { width:100%; font-size:12px; color:var(--muted); background:none; border:none; padding:4px; cursor:pointer; margin-bottom:10px; }
 .sendbtn { width: 100%; padding: 17px; background: var(--accent); color: #FFFFFF; border: none; border-radius: 18px; font-size: 16px; font-weight: 700; cursor: pointer; display: block; margin-top: 4px; }
 .sendbtn:active { opacity: 0.88; }
 .sendbtn.ok { background: var(--mint); }
@@ -92,9 +93,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 .modal label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
 .modal input[type=text], .modal input[type=time] { width: 100%; padding: 13px 15px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-size: 17px; color: var(--text); outline: none; font-family: inherit; margin-bottom: 16px; }
 .modal input:focus { border-color: var(--accent); }
-.emoji-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-.emoji-opt { width: 44px; height: 44px; border-radius: 12px; border: 2px solid transparent; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
-.emoji-opt.sel { border-color: var(--accent); background: var(--accent-light); }
 .copt-row { display: flex; gap: 10px; margin-bottom: 20px; }
 .copt { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid transparent; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; }
 .copt.a { background: var(--accent-light); color: var(--accent); }
@@ -106,13 +104,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 .msave { flex: 2; padding: 14px; border-radius: 14px; background: var(--accent); border: none; font-size: 15px; color: #fff; font-weight: 700; cursor: pointer; }
 .mdel { width: 100%; padding: 13px; border-radius: 14px; background: none; border: 1.5px solid #F0D0D0; color: #C06060; font-size: 14px; cursor: pointer; margin-top: 10px; }
 
-/* Calendar picker */
-.cal-sheet { background: var(--card); width: 100%; max-width: 480px; border-radius: 24px 24px 0 0; padding: 20px 20px 44px; }
-.cal-sheet h3 { font-size: 15px; font-weight: 600; color: var(--muted); text-align: center; margin-bottom: 16px; }
-.cal-btn { width: 100%; padding: 16px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); font-size: 16px; font-weight: 600; color: var(--text); cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
-.cal-btn:active { background: var(--border); }
-.cal-btn span { font-size: 24px; }
-.cal-cancel { width: 100%; padding: 14px; border-radius: 16px; border: none; background: none; font-size: 15px; color: var(--muted); cursor: pointer; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -148,10 +139,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
     </div>
     <button class="warrow" onclick="changeWeek(1)">&#8250;</button>
   </div>
-  <button class="prev-btn" id="prevbtn" onclick="copyPrev()">先週と同じにする</button>
+  <button class="reset-btn" onclick="resetWeek()">今週をリセット</button>
   <div id="drows"></div>
-  <button class="sendbtn" id="sendbtn" onclick="sendCal()">カレンダーへ一括送る</button>
-  <p class="sendhint">Google / iPhoneカレンダー両対応</p>
+  <button class="sendbtn" id="sendbtn" onclick="sendCal()">iPhoneカレンダーへ送る</button>
+  <p class="sendhint">iPhoneカレンダーに一括登録</p>
 </div>
 
 <!-- Child modal -->
@@ -161,7 +152,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
     <label>名前</label>
     <input type="text" id="child-name" placeholder="例：たろう">
     <label>アイコン</label>
-    <div class="emoji-row" id="emoji-row"></div>
+    <div id="emoji-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
     <div class="mbtns">
       <button class="mcancel" onclick="closeModal('child-ov')">キャンセル</button>
       <button class="msave" onclick="saveChild()">保存する</button>
@@ -195,7 +186,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 <script>
 var DAYS_LABEL = ['月曜日','火曜日','水曜日','木曜日','金曜日'];
 var DKEYS = ['mon','tue','wed','thu','fri'];
-var EMOJIS = ['👦','👧','🧒','👶','🐻','🐰','🐱','⭐','🌸','🦊'];
 var PAT_IDS = 'ABCDEFGH';
 
 function lsGet(k){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){return null;} }
@@ -321,12 +311,19 @@ function renderWeek(){
         function doSelect(){
           var d2=wd();
           if(!d2.sel[c.id]) d2.sel[c.id]={};
-          d2.sel[c.id][dkey]=p.id;
-          persist();
-          chipsDiv.querySelectorAll('.chip').forEach(function(x){
-            x.classList.remove('ona','onb','onc');
-          });
-          chip.classList.add('on'+p.pcol);
+          // すでに選択済みならキャンセル
+          if(d2.sel[c.id][dkey]===p.id){
+            d2.sel[c.id][dkey]=null;
+            persist();
+            chip.classList.remove('on'+p.pcol);
+          } else {
+            d2.sel[c.id][dkey]=p.id;
+            persist();
+            chipsDiv.querySelectorAll('.chip').forEach(function(x){
+              x.classList.remove('ona','onb','onc');
+            });
+            chip.classList.add('on'+p.pcol);
+          }
         }
 
         chip.addEventListener('touchend', function(e){
@@ -357,20 +354,6 @@ function renderWeek(){
     row.appendChild(memoEl);
     cont.appendChild(row);
   });
-}
-
-function copyPrev(){
-  var btn=document.getElementById('prevbtn');
-  var prev=store['w'+(offset-1)];
-  if(prev){
-    store[key()]=JSON.parse(JSON.stringify(prev));
-    persist(); renderWeek();
-    btn.textContent='読み込みました'; btn.classList.add('ok');
-    setTimeout(function(){btn.textContent='先週と同じにする';btn.classList.remove('ok');},2000);
-  } else {
-    btn.textContent='前の週のデータなし';
-    setTimeout(function(){btn.textContent='先週と同じにする';},2000);
-  }
 }
 
 function buildIcs(){
@@ -404,47 +387,45 @@ function buildIcs(){
   return {ics:ics,cnt:cnt};
 }
 
+function resetWeek(){
+  openModal('reset-ov');
+}
+function doReset(){
+  closeModal('reset-ov');
+  store[key()]={sel:{},memo:{mon:'',tue:'',wed:'',thu:'',fri:''}};
+  persist(); renderWeek();
+}
 function sendCal(){
   var result=buildIcs();
+  var btn=document.getElementById('sendbtn');
   if(result.cnt===0){
-    var btn=document.getElementById('sendbtn');
     btn.textContent='入力してください';
-    setTimeout(function(){btn.textContent='カレンダーへ一括送る';},2000);
+    setTimeout(function(){btn.textContent='iPhoneカレンダーへ送る';},2000);
     return;
   }
-  openModal('cal-ov');
-}
-
-function doSend(type){
-  closeModal('cal-ov');
-  var result=buildIcs();
-  var btn=document.getElementById('sendbtn');
-  if(type==='apple'){
-    window.location.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(result.ics);
-  } else {
-    // Google: download .ics file (then import in Google Calendar)
-    var blob=new Blob([result.ics],{type:'text/calendar;charset=utf-8'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url; a.download='下校時間.ics'; a.click();
-    URL.revokeObjectURL(url);
-  }
+  window.location.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(result.ics);
   btn.textContent=result.cnt+'件 送信しました！'; btn.classList.add('ok');
-  setTimeout(function(){btn.textContent='カレンダーへ一括送る';btn.classList.remove('ok');},3000);
+  setTimeout(function(){btn.textContent='iPhoneカレンダーへ送る';btn.classList.remove('ok');},3000);
 }
 
 // ---- CHILD MODAL ----
+var EMOJIS=['👦','👧','🧒','👶','🐻','🐰','🐱','🐶','⭐','🌸','🦊','🐼','🎀','🚀','🍀','🎵'];
 function buildEmojiRow(selected){
+  curEmoji=selected||'👦';
   var row=document.getElementById('emoji-row');
   row.innerHTML='';
   EMOJIS.forEach(function(em){
     var el=document.createElement('div');
-    el.className='emoji-opt'+(em===selected?' sel':'');
+    el.style.cssText='width:40px;height:40px;border-radius:10px;border:2px solid '+(em===curEmoji?'var(--accent)':'transparent')+';background:'+(em===curEmoji?'var(--accent-light)':'var(--bg)')+';display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;';
     el.textContent=em;
     el.addEventListener('click',function(){
       curEmoji=em;
-      row.querySelectorAll('.emoji-opt').forEach(function(o){o.classList.remove('sel');});
-      el.classList.add('sel');
+      row.querySelectorAll('div').forEach(function(o){
+        o.style.borderColor='transparent';
+        o.style.background='var(--bg)';
+      });
+      el.style.borderColor='var(--accent)';
+      el.style.background='var(--accent-light)';
     });
     row.appendChild(el);
   });
@@ -533,13 +514,17 @@ function closeModal(id){ document.getElementById(id).classList.remove('on'); }
 renderSettings();
 </script>
 
-<!-- Calendar picker -->
-<div class="overlay" id="cal-ov">
-  <div class="cal-sheet">
-    <h3>カレンダーを選んでください</h3>
-    <button class="cal-btn" onclick="doSend('apple')"><span>🍎</span> iPhoneカレンダー</button>
-    <button class="cal-btn" onclick="doSend('google')"><span>📅</span> Googleカレンダー</button>
-    <button class="cal-cancel" onclick="closeModal('cal-ov')">キャンセル</button>
+</div>
+
+<!-- Reset confirm -->
+<div class="overlay" id="reset-ov">
+  <div class="modal" style="padding:24px 20px 36px">
+    <h3 style="text-align:center;margin-bottom:8px">今週をリセット</h3>
+    <p style="text-align:center;font-size:14px;color:var(--muted);margin-bottom:24px">今週の入力がすべて消えます</p>
+    <div class="mbtns">
+      <button class="mcancel" onclick="closeModal('reset-ov')">キャンセル</button>
+      <button class="msave" style="background:#E06060" onclick="doReset()">リセットする</button>
+    </div>
   </div>
 </div>
 </body>

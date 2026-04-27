@@ -8,79 +8,131 @@
 <meta name="apple-mobile-web-app-title" content="下校タイマー">
 <title>下校タイマー</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --accent: #F07A5A;
-    --accent-light: #FFE8E0;
-    --mint: #5DCAA5;
-    --mint-light: #E1F5EEE;
-    --amber: #EF9F27;
-    --amber-light: #FFF3E0;
-    --bg: #FFF9F6;
-    --card: #FFFFFF;
-    --border: #F0E4DC;
-    --text: #3A2E2A;
-    --muted: #BBA8A2;
-    --placeholder: #D4C4BE;
-  }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
-  .header { background: var(--accent); padding: 52px 20px 20px; color: #fff; }
-  .header h1 { font-size: 22px; font-weight: 600; }
-  .header p { font-size: 13px; opacity: 0.85; margin-top: 3px; }
-  .tabnav { display: flex; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-  .tab { flex: 1; padding: 13px 0; text-align: center; font-size: 14px; color: var(--muted); border: none; background: none; border-bottom: 2.5px solid transparent; cursor: pointer; }
-  .tab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
-  .screen { display: none; padding: 16px 16px 48px; }
-  .screen.on { display: block; }
-  .hint { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
-  .pcard { background: var(--card); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 12px; }
-  .pdot { width: 44px; height: 44px; border-radius: 13px; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
-  .pdot.b { background: #E1F5EE; color: #0F6E56; }
-  .pdot.c { background: var(--amber-light); color: #854F0B; }
-  .pinfo { flex: 1; }
-  .plabel { font-size: 11px; color: var(--muted); }
-  .ptime { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-top: 1px; }
-  .edit-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
-  .add-btn { width: 100%; padding: 14px; background: none; border: 1.5px dashed #E0D0CA; border-radius: 16px; color: var(--muted); font-size: 14px; cursor: pointer; margin-top: 4px; }
-  .week-card { background: var(--card); border-radius: 16px; border: 1.5px solid var(--border); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
-  .warrow { width: 42px; height: 42px; border-radius: 12px; background: var(--bg); border: 1.5px solid var(--border); font-size: 24px; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .warrow:active { background: var(--border); }
-  .wcenter { text-align: center; flex: 1; }
-  .wdate { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; display: block; }
-  .wrel { font-size: 12px; font-weight: 600; margin-top: 3px; display: block; color: var(--accent); }
-  .wrel.gray { color: var(--muted); font-weight: 400; }
-  .prev-btn { width: 100%; font-size: 13px; color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px; cursor: pointer; margin-bottom: 12px; }
-  .prev-btn.ok { color: var(--mint); border-color: var(--mint); }
-  .dayrow { background: var(--card); border-radius: 16px; padding: 13px 15px; margin-bottom: 9px; border: 1.5px solid var(--border); }
-  .dayrow:focus-within { border-color: #F0B8A8; }
-  .dlabel { font-size: 11px; color: var(--muted); margin-bottom: 9px; font-weight: 500; }
-  .chips { display: flex; gap: 7px; flex-wrap: wrap; }
-  .chip { padding: 8px 13px; border-radius: 22px; font-size: 14px; border: 1.5px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; white-space: nowrap; }
-  .chip.ona { background: var(--accent-light); border-color: var(--accent); color: #B05040; font-weight: 600; }
-  .chip.onb { background: #E1F5EE; border-color: var(--mint); color: #0F6E56; font-weight: 600; }
-  .chip.onc { background: var(--amber-light); border-color: var(--amber); color: #854F0B; font-weight: 600; }
-  .memo { width: 100%; border: none; background: transparent; font-size: 13px; color: #8A7A74; outline: none; padding: 9px 0 1px; margin-top: 8px; border-top: 1px dashed var(--border); font-family: inherit; }
-  .memo::placeholder { color: var(--placeholder); }
-  .sendbtn { width: 100%; padding: 17px; background: var(--accent); color: #FFFFFF; border: none; border-radius: 18px; font-size: 16px; font-weight: 700; cursor: pointer; display: block; margin-top: 4px; }
-  .sendbtn:active { opacity: 0.88; }
-  .sendbtn.ok { background: var(--mint); }
-  .sendhint { font-size: 11px; color: var(--muted); text-align: center; margin-top: 9px; }
-  .overlay { display: none; position: fixed; inset: 0; background: rgba(58,46,42,0.4); z-index: 100; align-items: flex-end; justify-content: center; }
-  .overlay.on { display: flex; }
-  .modal { background: var(--card); width: 100%; max-width: 480px; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; }
-  .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
-  .modal label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
-  .modal input[type=text], .modal input[type=time] { width: 100%; padding: 13px 15px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-size: 17px; color: var(--text); outline: none; font-family: inherit; margin-bottom: 16px; }
-  .modal input:focus { border-color: var(--accent); }
-  .crow { display: flex; gap: 10px; margin-bottom: 20px; }
-  .copt { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid transparent; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .copt.a { background: var(--accent-light); color: var(--accent); }
-  .copt.b { background: #E1F5EE; color: #0F6E56; }
-  .copt.c { background: var(--amber-light); color: #854F0B; }
-  .copt.sel { border-color: currentColor; }
-  .mbtns { display: flex; gap: 10px; }
-  .mcancel { flex: 1; padding: 14px; border-radius: 14px; background: var(--bg); border: 1.5px solid var(--border); font-size: 15px; color: var(--muted); cursor: pointer; }
-  .msave { flex: 2; padding: 14px; border-radius: 14px; background: var(--accent); border: none; font-size: 15px; color: #fff; font-weight: 700; cursor: pointer; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --accent: #F07A5A;
+  --accent-light: #FFE8E0;
+  --mint: #5DCAA5;
+  --mint-light: #E1F5EE;
+  --amber: #EF9F27;
+  --amber-light: #FFF3E0;
+  --purple: #9B7FD4;
+  --purple-light: #EFE8FF;
+  --pink: #E97FA8;
+  --pink-light: #FFE8F2;
+  --blue: #5B9BD5;
+  --blue-light: #E3F0FF;
+  --bg: #FFF9F6;
+  --card: #FFFFFF;
+  --border: #F0E4DC;
+  --text: #3A2E2A;
+  --muted: #BBA8A2;
+  --placeholder: #D4C4BE;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
+
+.header { background: var(--accent); padding: 52px 20px 18px; color: #fff; }
+.header h1 { font-size: 22px; font-weight: 600; }
+.header p { font-size: 13px; opacity: 0.85; margin-top: 3px; }
+
+.tabnav { display: flex; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.tab { flex: 1; padding: 12px 0; text-align: center; font-size: 13px; color: var(--muted); border: none; background: none; border-bottom: 2.5px solid transparent; cursor: pointer; }
+.tab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+.screen { display: none; padding: 16px 16px 56px; }
+.screen.on { display: block; }
+
+/* Today screen */
+.today-header { text-align: center; margin-bottom: 18px; padding-top: 4px; }
+.today-date { font-size: 17px; font-weight: 700; color: var(--text); }
+.today-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+.child-card { background: var(--card); border-radius: 18px; border: 1.5px solid var(--border); padding: 16px 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; transition: opacity .3s; }
+.child-card.done { opacity: 0.45; }
+.child-avatar { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.child-info { flex: 1; }
+.child-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.child-time { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-top: 1px; }
+.child-countdown { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.child-countdown.soon { color: var(--accent); font-weight: 600; }
+.child-countdown.done { color: var(--mint); }
+.child-memo { font-size: 12px; color: #9A8A84; margin-top: 4px; }
+
+.no-data { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 14px; line-height: 1.8; }
+.no-data-btn { margin-top: 16px; padding: 11px 24px; background: var(--accent); color: #fff; border: none; border-radius: 22px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+/* Week screen */
+.week-card { background: var(--card); border-radius: 16px; border: 1.5px solid var(--border); padding: 13px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.warrow { width: 40px; height: 40px; border-radius: 11px; background: var(--bg); border: 1.5px solid var(--border); font-size: 22px; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.warrow:active { background: var(--border); }
+.wcenter { text-align: center; flex: 1; }
+.wdate { font-size: 19px; font-weight: 700; color: var(--text); display: block; }
+.wrel { font-size: 12px; font-weight: 600; color: var(--accent); display: block; margin-top: 2px; }
+.wrel.gray { color: var(--muted); font-weight: 400; }
+
+.prev-btn { width: 100%; font-size: 13px; color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px; cursor: pointer; margin-bottom: 12px; }
+.prev-btn.ok { color: var(--mint); border-color: var(--mint); }
+
+.dayrow { background: var(--card); border-radius: 16px; padding: 13px 15px; margin-bottom: 9px; border: 1.5px solid var(--border); }
+.dlabel { font-size: 12px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+.child-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.child-row:last-of-type { margin-bottom: 0; }
+.crow-name { font-size: 13px; font-weight: 600; color: var(--text); width: 52px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+.chip { padding: 6px 11px; border-radius: 20px; font-size: 13px; border: 1.5px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; white-space: nowrap; }
+.chip.ona { background: var(--accent-light); border-color: var(--accent); color: #B05040; font-weight: 600; }
+.chip.onb { background: var(--mint-light); border-color: var(--mint); color: #0F6E56; font-weight: 600; }
+.chip.onc { background: var(--amber-light); border-color: var(--amber); color: #854F0B; font-weight: 600; }
+
+.day-memo { width: 100%; border: none; background: transparent; font-size: 12px; color: #8A7A74; outline: none; padding: 8px 0 0; margin-top: 8px; border-top: 1px dashed var(--border); font-family: inherit; }
+.day-memo::placeholder { color: var(--placeholder); }
+
+.sendbtn { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 18px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+.sendbtn:active { opacity: 0.88; }
+.sendbtn.ok { background: var(--mint); }
+.sendhint { font-size: 11px; color: var(--muted); text-align: center; margin-top: 9px; }
+
+/* Settings screen */
+.sec-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .5px; margin: 18px 0 10px; text-transform: uppercase; }
+.sec-title:first-child { margin-top: 4px; }
+.scard { background: var(--card); border-radius: 16px; padding: 13px 16px; margin-bottom: 8px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.savatar { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.sinfo { flex: 1; }
+.sname { font-size: 15px; font-weight: 600; color: var(--text); }
+.sedit { width: 28px; height: 28px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.pcard { background: var(--card); border-radius: 16px; padding: 13px 16px; margin-bottom: 8px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.pdot { width: 40px; height: 40px; border-radius: 12px; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+.pdot.b { background: var(--mint-light); color: #0F6E56; }
+.pdot.c { background: var(--amber-light); color: #854F0B; }
+.pinfo { flex: 1; }
+.plabel { font-size: 11px; color: var(--muted); }
+.ptime { font-size: 20px; font-weight: 700; color: var(--text); margin-top: 1px; }
+.add-btn { width: 100%; padding: 13px; background: none; border: 1.5px dashed #E0D0CA; border-radius: 14px; color: var(--muted); font-size: 13px; cursor: pointer; margin-top: 4px; }
+
+/* Modal */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(58,46,42,0.4); z-index: 100; align-items: flex-end; justify-content: center; }
+.overlay.on { display: flex; }
+.modal { background: var(--card); width: 100%; max-width: 480px; border-radius: 24px 24px 0 0; padding: 24px 20px 44px; }
+.modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 18px; }
+.modal label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+.modal input[type=text], .modal input[type=time] { width: 100%; padding: 13px 15px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-size: 17px; color: var(--text); outline: none; font-family: inherit; margin-bottom: 16px; }
+.modal input:focus { border-color: var(--accent); }
+.emoji-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.emoji-opt { width: 44px; height: 44px; border-radius: 12px; border: 2px solid transparent; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+.emoji-opt.sel { border-color: var(--accent); background: var(--accent-light); }
+.color-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.color-opt { width: 36px; height: 36px; border-radius: 10px; border: 2.5px solid transparent; cursor: pointer; transition: transform .1s; }
+.color-opt.sel { border-color: #3A2E2A; transform: scale(1.15); }
+.copt-row { display: flex; gap: 10px; margin-bottom: 20px; }
+.copt { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid transparent; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; }
+.copt.a { background: var(--accent-light); color: var(--accent); }
+.copt.b { background: var(--mint-light); color: #0F6E56; }
+.copt.c { background: var(--amber-light); color: #854F0B; }
+.copt.sel { border-color: currentColor; }
+.mbtns { display: flex; gap: 10px; }
+.mcancel { flex: 1; padding: 14px; border-radius: 14px; background: var(--bg); border: 1.5px solid var(--border); font-size: 15px; color: var(--muted); cursor: pointer; }
+.msave { flex: 2; padding: 14px; border-radius: 14px; background: var(--accent); border: none; font-size: 15px; color: #fff; font-weight: 700; cursor: pointer; }
+.mdel { width: 100%; padding: 13px; border-radius: 14px; background: none; border: 1.5px solid #F0D0D0; color: #C06060; font-size: 14px; cursor: pointer; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -89,15 +141,22 @@
   <p>小学校の下校時間をかんたん管理</p>
 </div>
 <div class="tabnav">
-  <button class="tab on" onclick="switchTab('s1',this)">パターン設定</button>
-  <button class="tab" onclick="switchTab('s2',this)">今週の入力</button>
+  <button class="tab on" onclick="switchTab('s0',this)">今日</button>
+  <button class="tab" onclick="switchTab('s1',this)">今週の入力</button>
+  <button class="tab" onclick="switchTab('s2',this)">設定</button>
 </div>
-<div id="s1" class="screen on">
-  <p class="hint">よく使う下校時間を登録しておくと、毎週の入力がタップだけで完了します。</p>
-  <div id="plist"></div>
-  <button class="add-btn" onclick="openAdd()">＋ パターンを追加</button>
+
+<!-- Today -->
+<div id="s0" class="screen on">
+  <div class="today-header">
+    <div class="today-date" id="today-date">-</div>
+    <div class="today-sub">今日の下校時間</div>
+  </div>
+  <div id="today-list"></div>
 </div>
-<div id="s2" class="screen">
+
+<!-- Week -->
+<div id="s1" class="screen">
   <div class="week-card">
     <button class="warrow" onclick="changeWeek(-1)">&#8249;</button>
     <div class="wcenter">
@@ -111,178 +170,353 @@
   <button class="sendbtn" id="sendbtn" onclick="send()">カレンダーへ一括送る</button>
   <p class="sendhint">Google / iPhoneカレンダー両対応</p>
 </div>
-<div class="overlay" id="ov" onclick="closeOv(event)">
+
+<!-- Settings -->
+<div id="s2" class="screen">
+  <div class="sec-title">子供</div>
+  <div id="child-list"></div>
+  <button class="add-btn" onclick="openChildAdd()">＋ 子供を追加</button>
+  <div class="sec-title">下校パターン</div>
+  <div id="plist"></div>
+  <button class="add-btn" onclick="openPatAdd()">＋ パターンを追加</button>
+</div>
+
+<!-- Child modal -->
+<div class="overlay" id="child-ov" onclick="closeOv('child-ov',event)">
   <div class="modal">
-    <h3 id="mtitle">パターンを追加</h3>
-    <label>ラベル</label>
-    <input type="text" id="mlabel" placeholder="例：普通授業、短縮">
-    <label>下校時間</label>
-    <input type="time" id="mtime" value="14:30">
-    <label>色</label>
-    <div class="crow">
-      <div class="copt a sel" onclick="selCol('a',this)">A</div>
-      <div class="copt b" onclick="selCol('b',this)">B</div>
-      <div class="copt c" onclick="selCol('c',this)">C</div>
+    <h3 id="child-mtitle">子供を追加</h3>
+    <label>名前</label>
+    <input type="text" id="child-mname" placeholder="例：たろう">
+    <label>アイコン</label>
+    <div class="emoji-row" id="emoji-row">
+      <div class="emoji-opt sel" onclick="selEmoji(this)">👦</div>
+      <div class="emoji-opt" onclick="selEmoji(this)">👧</div>
+      <div class="emoji-opt" onclick="selEmoji(this)">🧒</div>
+      <div class="emoji-opt" onclick="selEmoji(this)">👶</div>
+      <div class="emoji-opt" onclick="selEmoji(this)">🐻</div>
+      <div class="emoji-opt" onclick="selEmoji(this)">🐰</div>
+      <div class="emoji-opt" onclick="selEmoji(this)">🐱</div>
+      <div class="emoji-opt" onclick="selEmoji(this)">⭐</div>
+    </div>
+    <label>カード色</label>
+    <div class="color-row" id="color-row">
+      <div class="color-opt sel" style="background:#FFE8E0" onclick="selColor(this,'#FFE8E0')"></div>
+      <div class="color-opt" style="background:#E1F5EE" onclick="selColor(this,'#E1F5EE')"></div>
+      <div class="color-opt" style="background:#FFF3E0" onclick="selColor(this,'#FFF3E0')"></div>
+      <div class="color-opt" style="background:#EFE8FF" onclick="selColor(this,'#EFE8FF')"></div>
+      <div class="color-opt" style="background:#FFE8F2" onclick="selColor(this,'#FFE8F2')"></div>
+      <div class="color-opt" style="background:#E3F0FF" onclick="selColor(this,'#E3F0FF')"></div>
     </div>
     <div class="mbtns">
-      <button class="mcancel" onclick="closeOvDirect()">キャンセル</button>
-      <button class="msave" onclick="savePat()">保存する</button>
+      <button class="mcancel" onclick="closeOvDirect('child-ov')">キャンセル</button>
+      <button class="msave" onclick="saveChild()">保存する</button>
     </div>
+    <button class="mdel" id="child-del" onclick="deleteChild()" style="display:none">削除する</button>
   </div>
 </div>
-<script>
-var DAYS = ['月曜日','火曜日','水曜日','木曜日','金曜日'];
-var DKEYS = ['mon','tue','wed','thu','fri'];
-var DEFAULT_PATS = [
-  {id:'A',label:'普通授業',time:'14:30',color:'a'},
-  {id:'B',label:'短縮授業',time:'13:00',color:'b'},
-  {id:'C',label:'早帰り',time:'12:15',color:'c'}
-];
-function lsGet(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch(e) { return null; } }
-function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
-function savePersist() { lsSet('pats', pats); lsSet('store', store); }
 
+<!-- Pattern modal -->
+<div class="overlay" id="pat-ov" onclick="closeOv('pat-ov',event)">
+  <div class="modal">
+    <h3 id="pat-mtitle">パターンを追加</h3>
+    <label>ラベル</label>
+    <input type="text" id="pat-label" placeholder="例：普通授業、短縮">
+    <label>下校時間</label>
+    <input type="time" id="pat-time" value="14:30">
+    <label>色</label>
+    <div class="copt-row">
+      <div class="copt a sel" onclick="selPatCol('a',this)">A</div>
+      <div class="copt b" onclick="selPatCol('b',this)">B</div>
+      <div class="copt c" onclick="selPatCol('c',this)">C</div>
+    </div>
+    <div class="mbtns">
+      <button class="mcancel" onclick="closeOvDirect('pat-ov')">キャンセル</button>
+      <button class="msave" onclick="savePat()">保存する</button>
+    </div>
+    <button class="mdel" id="pat-del" onclick="deletePat()" style="display:none">削除する</button>
+  </div>
+</div>
+
+<script>
+var DAYS_LABEL = ['月曜日','火曜日','水曜日','木曜日','金曜日'];
+var DKEYS = ['mon','tue','wed','thu','fri'];
+var DAY_MAP = {0:'sun',1:'mon',2:'tue',3:'wed',4:'thu',5:'fri',6:'sat'};
+
+var DEFAULT_CHILDREN = [
+  {id:'c1', name:'子供1', emoji:'👦', color:'#FFE8E0'}
+];
+var DEFAULT_PATS = [
+  {id:'A', label:'普通授業', time:'14:30', pcol:'a'},
+  {id:'B', label:'短縮授業', time:'13:00', pcol:'b'},
+  {id:'C', label:'早帰り',   time:'12:15', pcol:'c'}
+];
+
+function lsGet(k) { try { var v=localStorage.getItem(k); return v?JSON.parse(v):null; } catch(e){return null;} }
+function lsSet(k,v) { try { localStorage.setItem(k,JSON.stringify(v)); } catch(e){} }
+function persist() { lsSet('children',children); lsSet('pats',pats); lsSet('store',store); }
+
+var children = lsGet('children') || DEFAULT_CHILDREN;
 var pats = lsGet('pats') || DEFAULT_PATS;
 var store = lsGet('store') || {};
 var offset = 0;
-var editIdx = null;
-var col = 'a';
 
+// Modal state
+var editChildIdx = null, editPatIdx = null;
+var curEmoji = '👦', curColor = '#FFE8E0', curPatCol = 'a';
+
+function uid() { return 'c'+Date.now(); }
 function key() { return 'w'+offset; }
 function wd() {
-  if (!store[key()]) store[key()] = {sel:{mon:null,tue:null,wed:null,thu:null,fri:null},memo:{mon:'',tue:'',wed:'',thu:'',fri:''}};
+  if (!store[key()]) store[key()] = {sel:{},memo:{mon:'',tue:'',wed:'',thu:'',fri:''}};
   return store[key()];
 }
 function getMon(off) {
-  var now = new Date();
-  var day = now.getDay() || 7;
-  var mon = new Date(now);
-  mon.setDate(now.getDate() - day + 1 + off * 7);
+  var now=new Date(), day=now.getDay()||7;
+  var mon=new Date(now);
+  mon.setDate(now.getDate()-day+1+off*7);
   mon.setHours(0,0,0,0);
   return mon;
 }
-function fmt(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
-function changeWeek(dir) { offset += dir; renderWeek(); }
-function switchTab(id, btn) {
+function fmt(d){ return (d.getMonth()+1)+'/'+d.getDate(); }
+function changeWeek(dir){ offset+=dir; renderWeek(); }
+
+function switchTab(id,btn){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
   document.getElementById(id).classList.add('on');
   btn.classList.add('on');
-  if (id==='s2') renderWeek();
+  if(id==='s0') renderToday();
+  if(id==='s1') renderWeek();
+  if(id==='s2') renderSettings();
 }
-function renderWeek() {
-  var mon = getMon(offset);
-  var fri = new Date(mon); fri.setDate(mon.getDate()+4);
-  document.getElementById('wdate').textContent = fmt(mon)+' 〜 '+fmt(fri);
-  var relEl = document.getElementById('wrel');
-  var rel = offset===0?'今週':offset===1?'来週':offset===-1?'先週':offset>0?offset+'週間後':Math.abs(offset)+'週間前';
-  relEl.textContent = rel;
-  relEl.className = 'wrel'+(offset===0?'':' gray');
+
+// ---- TODAY ----
+function getCountdown(timeStr) {
+  var now=new Date();
+  var parts=timeStr.split(':');
+  var target=new Date(now);
+  target.setHours(+parts[0],+parts[1],0,0);
+  var diff=target-now;
+  if(diff<0) return {text:'帰宅済み',done:true,soon:false};
+  var mins=Math.floor(diff/60000);
+  var hrs=Math.floor(mins/60);
+  mins=mins%60;
+  var soon=diff<1800000;
+  if(hrs>0) return {text:'あと'+hrs+'時間'+mins+'分',done:false,soon:soon};
+  return {text:'あと'+mins+'分',done:false,soon:soon};
+}
+
+function renderToday() {
+  var now=new Date();
+  var dayNames=['日','月','火','水','木','金','土'];
+  document.getElementById('today-date').textContent =
+    (now.getMonth()+1)+'月'+now.getDate()+'日（'+dayNames[now.getDay()]+'）';
+
+  var dkey = DAY_MAP[now.getDay()];
+  var isWeekend = (now.getDay()===0||now.getDay()===6);
+  var list = document.getElementById('today-list');
+  list.innerHTML='';
+
+  if(isWeekend) {
+    list.innerHTML='<div class="no-data">今日は土日です 🌸<br>ゆっくり休んでください</div>';
+    return;
+  }
+
   var d = wd();
-  var cont = document.getElementById('drows');
-  cont.innerHTML = '';
-  DKEYS.forEach(function(k,i) {
-    var row = document.createElement('div');
-    row.className = 'dayrow';
-    var chips = pats.map(function(p) {
-      var on = d.sel[k]===p.id?' on'+p.color:'';
-      return '<div class="chip'+on+'" onclick="selDay(\''+k+'\',\''+p.id+'\',this)">'+p.id+'&emsp;'+p.time+'</div>';
+  var hasData = false;
+  children.forEach(function(c) {
+    var pid = d.sel[c.id] ? d.sel[c.id][dkey] : null;
+    if(!pid) return;
+    var p = pats.find(function(x){return x.id===pid;});
+    if(!p) return;
+    hasData = true;
+    var cd = getCountdown(p.time);
+    var memo = d.memo[dkey]||'';
+    var card = document.createElement('div');
+    card.className = 'child-card'+(cd.done?' done':'');
+    card.innerHTML =
+      '<div class="child-avatar" style="background:'+c.color+'">'+c.emoji+'</div>'+
+      '<div class="child-info">'+
+        '<div class="child-name">'+c.name+'</div>'+
+        '<div class="child-time" style="color:'+(cd.done?'var(--muted)':'var(--text)')+'">'+p.time+'</div>'+
+        '<div class="child-countdown'+(cd.done?' done':cd.soon?' soon':'')+'">'+cd.text+'</div>'+
+        (memo?'<div class="child-memo">📝 '+memo+'</div>':'')+
+      '</div>';
+    list.appendChild(card);
+  });
+
+  if(!hasData) {
+    list.innerHTML = '<div class="no-data">今日の入力がまだです 📝<br><br>'+
+      '<button class="no-data-btn" onclick="goToWeek()">今週を入力する</button></div>';
+  }
+}
+
+function goToWeek() {
+  document.querySelectorAll('.tab')[1].click();
+}
+
+// ---- WEEK ----
+function renderWeek() {
+  var mon=getMon(offset), fri=new Date(mon);
+  fri.setDate(mon.getDate()+4);
+  document.getElementById('wdate').textContent=fmt(mon)+' 〜 '+fmt(fri);
+  var relEl=document.getElementById('wrel');
+  var rel=offset===0?'今週':offset===1?'来週':offset===-1?'先週':offset>0?offset+'週間後':Math.abs(offset)+'週間前';
+  relEl.textContent=rel;
+  relEl.className='wrel'+(offset===0?'':' gray');
+
+  var d=wd();
+  var cont=document.getElementById('drows');
+  cont.innerHTML='';
+
+  DKEYS.forEach(function(dkey,i) {
+    var row=document.createElement('div');
+    row.className='dayrow';
+    var childRows = children.map(function(c) {
+      var sel = d.sel[c.id] ? d.sel[c.id][dkey] : null;
+      var chips = pats.map(function(p) {
+        var on = sel===p.id?' on'+p.pcol:'';
+        return '<div class="chip'+on+'" onclick="selDay(\''+c.id+'\',\''+dkey+'\',\''+p.id+'\',this)">'+p.id+'&ensp;'+p.time+'</div>';
+      }).join('');
+      return '<div class="child-row">'+
+        '<div class="crow-name">'+c.emoji+' '+c.name+'</div>'+
+        '<div class="chips">'+chips+'</div>'+
+        '</div>';
     }).join('');
-    var m = (d.memo[k]||'').replace(/"/g,'&quot;');
-    row.innerHTML = '<div class="dlabel">'+DAYS[i]+'</div><div class="chips">'+chips+'</div><input class="memo" type="text" placeholder="メモ（任意）" value="'+m+'" oninput="saveMemo(\''+k+'\',this.value)">';
+    var m=(d.memo[dkey]||'').replace(/"/g,'&quot;');
+    row.innerHTML='<div class="dlabel">'+DAYS_LABEL[i]+'</div>'+childRows+
+      '<input class="day-memo" type="text" placeholder="メモ（任意）" value="'+m+'" oninput="saveMemo(\''+dkey+'\',this.value)">';
     cont.appendChild(row);
   });
 }
-function selDay(k, pid, el) {
-  wd().sel[k] = pid; savePersist();
-  el.parentElement.querySelectorAll('.chip').forEach(function(c){c.classList.remove('ona','onb','onc');});
-  var p = pats.find(function(x){return x.id===pid;});
-  el.classList.add('on'+p.color);
+
+function selDay(cid, dkey, pid, el) {
+  var d=wd();
+  if(!d.sel[cid]) d.sel[cid]={};
+  d.sel[cid][dkey]=pid;
+  persist();
+  var chips=el.parentElement.querySelectorAll('.chip');
+  chips.forEach(function(c){c.classList.remove('ona','onb','onc');});
+  var p=pats.find(function(x){return x.id===pid;});
+  el.classList.add('on'+p.pcol);
 }
-function saveMemo(k, v) { wd().memo[k] = v; savePersist(); }
-function copyPrev() {
-  var btn = document.getElementById('prevbtn');
-  var prev = store['w'+(offset-1)];
-  if (prev) {
-    store[key()] = JSON.parse(JSON.stringify(prev)); savePersist();
-    renderWeek();
-    btn.textContent = '読み込みました';
-    btn.classList.add('ok');
-    setTimeout(function(){btn.textContent='先週と同じにする';btn.classList.remove('ok');},2000);
-  } else {
-    btn.textContent = '前の週のデータなし';
-    setTimeout(function(){btn.textContent='先週と同じにする';},2000);
-  }
+function saveMemo(dkey,v){ wd().memo[dkey]=v; persist(); }
+function copyPrev(){
+  var btn=document.getElementById('prevbtn');
+  var prev=store['w'+(offset-1)];
+  if(prev){ store[key()]=JSON.parse(JSON.stringify(prev)); persist(); renderWeek(); btn.textContent='読み込みました'; btn.classList.add('ok'); setTimeout(function(){btn.textContent='先週と同じにする';btn.classList.remove('ok');},2000); }
+  else{ btn.textContent='前の週のデータなし'; setTimeout(function(){btn.textContent='先週と同じにする';},2000); }
 }
-function send() {
-  var btn = document.getElementById('sendbtn');
-  var d = wd();
-  var mon = getMon(offset);
-  var ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//下校タイマー//JP\r\nCALSCALE:GREGORIAN\r\n';
-  var cnt = 0;
-  DKEYS.forEach(function(k,i) {
-    var pid = d.sel[k]; if (!pid) return;
-    var p = pats.find(function(x){return x.id===pid;}); if (!p) return;
-    var date = new Date(mon); date.setDate(mon.getDate()+i);
-    var parts = p.time.split(':');
-    var st = new Date(date); st.setHours(+parts[0],+parts[1],0);
-    var en = new Date(st); en.setMinutes(en.getMinutes()+30);
-    var f = function(dt){ return dt.getFullYear()+('0'+(dt.getMonth()+1)).slice(-2)+('0'+dt.getDate()).slice(-2)+'T'+('0'+dt.getHours()).slice(-2)+('0'+dt.getMinutes()).slice(-2)+'00'; };
-    var memo = d.memo[k] ? '\\n'+d.memo[k] : '';
-    ics += 'BEGIN:VEVENT\r\nSUMMARY:下校 '+p.time+'（'+p.label+'）\r\nDTSTART:'+f(st)+'\r\nDTEND:'+f(en)+'\r\nDESCRIPTION:'+p.label+memo+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nACTION:DISPLAY\r\nDESCRIPTION:もうすぐ下校時間です\r\nEND:VALARM\r\nEND:VEVENT\r\n';
-    cnt++;
+
+function send(){
+  var btn=document.getElementById('sendbtn');
+  var d=wd(), mon=getMon(offset);
+  var ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//下校タイマー//JP\r\nCALSCALE:GREGORIAN\r\n';
+  var cnt=0;
+  DKEYS.forEach(function(dkey,i){
+    var memo=d.memo[dkey]||'';
+    children.forEach(function(c){
+      var pid=d.sel[c.id]?d.sel[c.id][dkey]:null; if(!pid) return;
+      var p=pats.find(function(x){return x.id===pid;}); if(!p) return;
+      var date=new Date(mon); date.setDate(mon.getDate()+i);
+      var parts=p.time.split(':');
+      var st=new Date(date); st.setHours(+parts[0],+parts[1],0);
+      var en=new Date(st); en.setMinutes(en.getMinutes()+30);
+      var f=function(dt){return dt.getFullYear()+('0'+(dt.getMonth()+1)).slice(-2)+('0'+dt.getDate()).slice(-2)+'T'+('0'+dt.getHours()).slice(-2)+('0'+dt.getMinutes()).slice(-2)+'00';};
+      var desc=c.name+' '+p.label+(memo?'\\n'+memo:'');
+      ics+='BEGIN:VEVENT\r\nSUMMARY:'+c.name+' 下校 '+p.time+'\r\nDTSTART:'+f(st)+'\r\nDTEND:'+f(en)+'\r\nDESCRIPTION:'+desc+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nACTION:DISPLAY\r\nDESCRIPTION:もうすぐ'+c.name+'の下校です\r\nEND:VALARM\r\nEND:VEVENT\r\n';
+      cnt++;
+    });
   });
-  ics += 'END:VCALENDAR';
-  if (cnt===0) { btn.textContent='曜日を選んでください'; setTimeout(function(){btn.textContent='カレンダーへ一括送る';},2000); return; }
-  window.location.href = 'data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
-  btn.textContent = cnt+'件 送信しました！';
-  btn.classList.add('ok');
+  ics+='END:VCALENDAR';
+  if(cnt===0){btn.textContent='入力してください'; setTimeout(function(){btn.textContent='カレンダーへ一括送る';},2000); return;}
+  window.location.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
+  btn.textContent=cnt+'件 送信しました！'; btn.classList.add('ok');
   setTimeout(function(){btn.textContent='カレンダーへ一括送る';btn.classList.remove('ok');},3000);
 }
-function renderPats() {
-  document.getElementById('plist').innerHTML = pats.map(function(p,i){
-    return '<div class="pcard"><div class="pdot '+( p.color==='a'?'':p.color )+'">'+p.id+'</div><div class="pinfo"><div class="plabel">'+p.label+'</div><div class="ptime">'+p.time+'</div></div><button class="edit-btn" onclick="openEdit('+i+')">…</button></div>';
+
+// ---- SETTINGS ----
+function renderSettings(){
+  document.getElementById('child-list').innerHTML=children.map(function(c,i){
+    return '<div class="scard"><div class="savatar" style="background:'+c.color+'">'+c.emoji+'</div><div class="sinfo"><div class="sname">'+c.name+'</div></div><button class="sedit" onclick="openChildEdit('+i+')">…</button></div>';
+  }).join('');
+  document.getElementById('plist').innerHTML=pats.map(function(p,i){
+    return '<div class="pcard"><div class="pdot '+( p.pcol==='a'?'':p.pcol )+'">'+p.id+'</div><div class="pinfo"><div class="plabel">'+p.label+'</div><div class="ptime">'+p.time+'</div></div><button class="sedit" onclick="openPatEdit('+i+')">…</button></div>';
   }).join('');
 }
-function openAdd() {
-  editIdx = null;
-  document.getElementById('mtitle').textContent = 'パターンを追加';
-  document.getElementById('mlabel').value = '';
-  document.getElementById('mtime').value = '14:30';
-  col = 'a';
-  document.querySelectorAll('.copt').forEach(function(o){o.classList.remove('sel');});
-  document.querySelector('.copt.a').classList.add('sel');
-  document.getElementById('ov').classList.add('on');
+
+// ---- CHILD MODAL ----
+function openChildAdd(){
+  editChildIdx=null; curEmoji='👦'; curColor='#FFE8E0';
+  document.getElementById('child-mtitle').textContent='子供を追加';
+  document.getElementById('child-mname').value='';
+  document.getElementById('child-del').style.display='none';
+  document.querySelectorAll('.emoji-opt').forEach(function(o,i){o.classList.toggle('sel',i===0);});
+  document.querySelectorAll('.color-opt').forEach(function(o,i){o.classList.toggle('sel',i===0);});
+  document.getElementById('child-ov').classList.add('on');
 }
-function openEdit(idx) {
-  editIdx = idx; var p = pats[idx];
-  document.getElementById('mtitle').textContent = 'パターンを編集';
-  document.getElementById('mlabel').value = p.label;
-  document.getElementById('mtime').value = p.time;
-  col = p.color;
-  document.querySelectorAll('.copt').forEach(function(o){o.classList.remove('sel');});
-  document.querySelector('.copt.'+p.color).classList.add('sel');
-  document.getElementById('ov').classList.add('on');
+function openChildEdit(idx){
+  editChildIdx=idx; var c=children[idx];
+  curEmoji=c.emoji; curColor=c.color;
+  document.getElementById('child-mtitle').textContent='子供を編集';
+  document.getElementById('child-mname').value=c.name;
+  document.getElementById('child-del').style.display='block';
+  document.querySelectorAll('.emoji-opt').forEach(function(o){o.classList.toggle('sel',o.textContent===c.emoji);});
+  document.querySelectorAll('.color-opt').forEach(function(o){o.classList.toggle('sel',o.style.background===c.color||o.style.backgroundColor===c.color);});
+  document.getElementById('child-ov').classList.add('on');
 }
-function selCol(c, el) {
-  col = c;
-  document.querySelectorAll('.copt').forEach(function(o){o.classList.remove('sel');});
-  el.classList.add('sel');
+function selEmoji(el){ curEmoji=el.textContent; document.querySelectorAll('.emoji-opt').forEach(function(o){o.classList.remove('sel');}); el.classList.add('sel'); }
+function selColor(el,c){ curColor=c; document.querySelectorAll('.color-opt').forEach(function(o){o.classList.remove('sel');}); el.classList.add('sel'); }
+function saveChild(){
+  var name=document.getElementById('child-mname').value.trim()||'子供';
+  if(editChildIdx!==null){ children[editChildIdx]={id:children[editChildIdx].id,name:name,emoji:curEmoji,color:curColor}; }
+  else{ children.push({id:uid(),name:name,emoji:curEmoji,color:curColor}); }
+  persist(); closeOvDirect('child-ov'); renderSettings();
 }
-function savePat() {
-  var label = document.getElementById('mlabel').value.trim() || 'パターン';
-  var time = document.getElementById('mtime').value || '14:30';
-  var ids = 'ABCDEFGH';
-  if (editIdx !== null) {
-    pats[editIdx] = {id:pats[editIdx].id, label:label, time:time, color:col};
-  } else {
-    pats.push({id:ids[pats.length]||'X', label:label, time:time, color:col});
-  }
-  closeOvDirect(); savePersist(); renderPats();
+function deleteChild(){
+  if(children.length<=1){alert('最低1人は必要です');return;}
+  children.splice(editChildIdx,1); persist(); closeOvDirect('child-ov'); renderSettings();
 }
-function closeOv(e) { if (e.target===document.getElementById('ov')) closeOvDirect(); }
-function closeOvDirect() { document.getElementById('ov').classList.remove('on'); }
-renderPats(); renderWeek();
+
+// ---- PATTERN MODAL ----
+function openPatAdd(){
+  editPatIdx=null; curPatCol='a';
+  document.getElementById('pat-mtitle').textContent='パターンを追加';
+  document.getElementById('pat-label').value='';
+  document.getElementById('pat-time').value='14:30';
+  document.getElementById('pat-del').style.display='none';
+  document.querySelectorAll('.copt').forEach(function(o){o.classList.toggle('sel',o.classList.contains('a'));});
+  document.getElementById('pat-ov').classList.add('on');
+}
+function openPatEdit(idx){
+  editPatIdx=idx; var p=pats[idx]; curPatCol=p.pcol;
+  document.getElementById('pat-mtitle').textContent='パターンを編集';
+  document.getElementById('pat-label').value=p.label;
+  document.getElementById('pat-time').value=p.time;
+  document.getElementById('pat-del').style.display='block';
+  document.querySelectorAll('.copt').forEach(function(o){o.classList.toggle('sel',o.classList.contains(p.pcol));});
+  document.getElementById('pat-ov').classList.add('on');
+}
+function selPatCol(c,el){ curPatCol=c; document.querySelectorAll('.copt').forEach(function(o){o.classList.remove('sel');}); el.classList.add('sel'); }
+function savePat(){
+  var label=document.getElementById('pat-label').value.trim()||'パターン';
+  var time=document.getElementById('pat-time').value||'14:30';
+  var ids='ABCDEFGH';
+  if(editPatIdx!==null){ pats[editPatIdx]={id:pats[editPatIdx].id,label:label,time:time,pcol:curPatCol}; }
+  else{ pats.push({id:ids[pats.length]||'Z',label:label,time:time,pcol:curPatCol}); }
+  persist(); closeOvDirect('pat-ov'); renderSettings();
+}
+function deletePat(){
+  pats.splice(editPatIdx,1); persist(); closeOvDirect('pat-ov'); renderSettings();
+}
+
+function closeOv(id,e){ if(e.target===document.getElementById(id)) closeOvDirect(id); }
+function closeOvDirect(id){ document.getElementById(id).classList.remove('on'); }
+
+// Init
+renderToday();
+renderSettings();
+setInterval(function(){ if(document.getElementById('s0').classList.contains('on')) renderToday(); },60000);
 </script>
 </body>
 </html>

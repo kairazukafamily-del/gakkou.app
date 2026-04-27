@@ -210,7 +210,9 @@ function uid(){ return 'c'+Date.now()+Math.floor(Math.random()*1000); }
 
 var DEFAULT_CHILDREN = [{id:'c1',name:'こどもの名前',emoji:'👦'}];
 var children = lsGet('v2_children') || DEFAULT_CHILDREN;
-var DEFAULT_PATS = [];
+var DEFAULT_PATS = [
+  {id:'A',label:'',time:'14:30',pcol:'a',note:''}
+];
 var pats = lsGet('v2_pats') || DEFAULT_PATS;
 var store = lsGet('v2_store') || {};
 var offset = 0;

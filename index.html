@@ -134,7 +134,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
   <div class="sec-label">げこうパターン</div>
   <div id="plist"></div>
   <button class="add-btn" onclick="openPatAdd()">＋ パターンを追加</button>
-  <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">子供の設定をリセット（デフォルトに戻す）</button>
+  <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">こどもの設定をリセット（デフォルトに戻す）</button>
 </div>
 
 <!-- Week -->
@@ -415,6 +415,11 @@ function doResetSettings(){
   persist(); closeModal('reset-settings-ov'); renderSettings();
 }
 function resetWeek(){
+  var mon=getMon(offset), fri=new Date(mon);
+  fri.setDate(mon.getDate()+4);
+  var label=fmt(mon)+' 〜 '+fmt(fri);
+  document.getElementById('reset-modal-title').textContent=label+' をリセット';
+  document.getElementById('reset-modal-desc').textContent=label+' の入力がすべて消えます';
   openModal('reset-ov');
 }
 function doReset(){
@@ -476,7 +481,7 @@ function openChildEdit(idx){
   openModal('child-ov');
 }
 function saveChild(){
-  var name=document.getElementById('child-name').value.trim()||'子供';
+  var name=document.getElementById('child-name').value.trim()||'こどもの名前';
   if(editChildIdx!==null){
     children[editChildIdx]={id:children[editChildIdx].id,name:name,emoji:curEmoji};
   } else {
@@ -561,8 +566,8 @@ renderSettings();
 <!-- Reset confirm -->
 <div class="overlay" id="reset-ov">
   <div class="modal" style="padding:24px 20px 36px">
-    <h3 style="text-align:center;margin-bottom:8px">今週をリセット</h3>
-    <p style="text-align:center;font-size:14px;color:var(--muted);margin-bottom:24px">今週の入力がすべて消えます</p>
+    <h3 id="reset-modal-title" style="text-align:center;margin-bottom:8px">今週をリセット</h3>
+    <p id="reset-modal-desc" style="text-align:center;font-size:14px;color:var(--muted);margin-bottom:24px">今週の入力がすべて消えます</p>
     <div class="mbtns">
       <button class="mcancel" onclick="closeModal('reset-ov')">キャンセル</button>
       <button class="msave" style="background:#E06060" onclick="doReset()">リセットする</button>

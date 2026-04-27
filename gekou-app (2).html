@@ -372,34 +372,54 @@ function renderWeek() {
   DKEYS.forEach(function(dkey,i) {
     var row=document.createElement('div');
     row.className='dayrow';
-    var childRows = children.map(function(c) {
+    var dlabel=document.createElement('div');
+    dlabel.className='dlabel';
+    dlabel.textContent=DAYS_LABEL[i];
+    row.appendChild(dlabel);
+
+    children.forEach(function(c) {
       var sel = d.sel[c.id] ? d.sel[c.id][dkey] : null;
-      var chips = pats.map(function(p) {
-        var on = sel===p.id?' on'+p.pcol:'';
-        return '<div class="chip'+on+'" onclick="selDay(\''+c.id+'\',\''+dkey+'\',\''+p.id+'\',this)">'+p.id+'&ensp;'+p.time+'</div>';
-      }).join('');
-      return '<div class="child-row">'+
-        '<div class="crow-name">'+c.emoji+' '+c.name+'</div>'+
-        '<div class="chips">'+chips+'</div>'+
-        '</div>';
-    }).join('');
-    var m=(d.memo[dkey]||'').replace(/"/g,'&quot;');
-    row.innerHTML='<div class="dlabel">'+DAYS_LABEL[i]+'</div>'+childRows+
-      '<input class="day-memo" type="text" placeholder="メモ（任意）" value="'+m+'" oninput="saveMemo(\''+dkey+'\',this.value)">';
+      var crow=document.createElement('div');
+      crow.className='child-row';
+      var nameDiv=document.createElement('div');
+      nameDiv.className='crow-name';
+      nameDiv.textContent=c.emoji+' '+c.name;
+      crow.appendChild(nameDiv);
+      var chipsDiv=document.createElement('div');
+      chipsDiv.className='chips';
+      pats.forEach(function(p) {
+        var chip=document.createElement('div');
+        chip.className='chip'+(sel===p.id?' on'+p.pcol:'');
+        chip.textContent=p.id+' '+p.time;
+        chip.addEventListener('click', (function(cid,dk,pid,pcol){
+          return function(){
+            var d2=wd();
+            if(!d2.sel[cid]) d2.sel[cid]={};
+            d2.sel[cid][dk]=pid;
+            persist();
+            chipsDiv.querySelectorAll('.chip').forEach(function(x){x.classList.remove('ona','onb','onc');});
+            chip.classList.add('on'+pcol);
+          };
+        })(c.id, dkey, p.id, p.pcol));
+        chipsDiv.appendChild(chip);
+      });
+      crow.appendChild(chipsDiv);
+      row.appendChild(crow);
+    });
+
+    var m=(d.memo[dkey]||'');
+    var memoInput=document.createElement('input');
+    memoInput.className='day-memo';
+    memoInput.type='text';
+    memoInput.placeholder='メモ（任意）';
+    memoInput.value=m;
+    memoInput.addEventListener('input', (function(dk){ return function(){ saveMemo(dk, this.value); }; })(dkey));
+    row.appendChild(memoInput);
     cont.appendChild(row);
   });
 }
 
-function selDay(cid, dkey, pid, el) {
-  var d=wd();
-  if(!d.sel[cid]) d.sel[cid]={};
-  d.sel[cid][dkey]=pid;
-  persist();
-  var chips=el.parentElement.querySelectorAll('.chip');
-  chips.forEach(function(c){c.classList.remove('ona','onb','onc');});
-  var p=pats.find(function(x){return x.id===pid;});
-  el.classList.add('on'+p.pcol);
-}
+
 function saveMemo(dkey,v){ wd().memo[dkey]=v; persist(); }
 function copyPrev(){
   var btn=document.getElementById('prevbtn');

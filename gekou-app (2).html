@@ -133,13 +133,18 @@
 <script>
 var DAYS = ['月曜日','火曜日','水曜日','木曜日','金曜日'];
 var DKEYS = ['mon','tue','wed','thu','fri'];
-var pats = [
+var DEFAULT_PATS = [
   {id:'A',label:'普通授業',time:'14:30',color:'a'},
   {id:'B',label:'短縮授業',time:'13:00',color:'b'},
   {id:'C',label:'早帰り',time:'12:15',color:'c'}
 ];
+function lsGet(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch(e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function savePersist() { lsSet('pats', pats); lsSet('store', store); }
+
+var pats = lsGet('pats') || DEFAULT_PATS;
+var store = lsGet('store') || {};
 var offset = 0;
-var store = {};
 var editIdx = null;
 var col = 'a';
 
@@ -189,17 +194,17 @@ function renderWeek() {
   });
 }
 function selDay(k, pid, el) {
-  wd().sel[k] = pid;
+  wd().sel[k] = pid; savePersist();
   el.parentElement.querySelectorAll('.chip').forEach(function(c){c.classList.remove('ona','onb','onc');});
   var p = pats.find(function(x){return x.id===pid;});
   el.classList.add('on'+p.color);
 }
-function saveMemo(k, v) { wd().memo[k] = v; }
+function saveMemo(k, v) { wd().memo[k] = v; savePersist(); }
 function copyPrev() {
   var btn = document.getElementById('prevbtn');
   var prev = store['w'+(offset-1)];
   if (prev) {
-    store[key()] = JSON.parse(JSON.stringify(prev));
+    store[key()] = JSON.parse(JSON.stringify(prev)); savePersist();
     renderWeek();
     btn.textContent = '読み込みました';
     btn.classList.add('ok');
@@ -273,7 +278,7 @@ function savePat() {
   } else {
     pats.push({id:ids[pats.length]||'X', label:label, time:time, color:col});
   }
-  closeOvDirect(); renderPats();
+  closeOvDirect(); savePersist(); renderPats();
 }
 function closeOv(e) { if (e.target===document.getElementById('ov')) closeOvDirect(); }
 function closeOvDirect() { document.getElementById('ov').classList.remove('on'); }

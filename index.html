@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="下校タイマー">
 <title>下校タイマー</title>
-<style><スタイル>
+<style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
   --accent: #F07A5A;
@@ -16,6 +16,10 @@
   --mint-light: #E1F5EE;
   --amber: #EF9F27;
   --amber-light: #FFF3E0;
+  --purple: #9B7FD4;
+  --purple-light: #EFE8FF;
+  --pink: #E97FA8;
+  --pink-light: #FFE8F2;
   --bg: #FFF9F6;
   --card: #FFFFFF;
   --border: #F0E4DC;
@@ -127,6 +131,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
   <div id="plist"></div>
   <button class="add-btn" onclick="openPatAdd()">＋ パターンを追加</button>
   <p class="hint" style="margin-top:16px">最初に一度だけ設定すればOK</p>
+  <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">設定をリセット（デフォルトに戻す）</button>
 </div>
 
 <!-- Week -->
@@ -170,11 +175,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
     <label>下校時間</label>
     <input type="time" id="pat-time" value="14:30">
     <label>色</label>
-    <div class="copt-row" id="copt-row">
+    <div class="copt-row" id="copt-row" style="flex-wrap:wrap;">
       <div class="copt a" onclick="selPatCol('a',this)">A</div>
       <div class="copt b" onclick="selPatCol('b',this)">B</div>
       <div class="copt c" onclick="selPatCol('c',this)">C</div>
+      <div class="copt d" onclick="selPatCol('d',this)">D</div>
+      <div class="copt e" onclick="selPatCol('e',this)">E</div>
     </div>
+    <label>カレンダー備考（任意）</label>
+    <input type="text" id="pat-note" placeholder="例：給食なし、弁当持参">
     <div class="mbtns">
       <button class="mcancel" onclick="closeModal('pat-ov')">キャンセル</button>
       <button class="msave" onclick="savePat()">保存する</button>
@@ -193,12 +202,16 @@ function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){}
 function persist(){ lsSet('v2_children',children); lsSet('v2_pats',pats); lsSet('v2_store',store); }
 function uid(){ return 'c'+Date.now()+Math.floor(Math.random()*1000); }
 
-var children = lsGet('v2_children') || [{id:'c1',name:'子供1',emoji:'👦'}];
-var pats = lsGet('v2_pats') || [
-  {id:'A',label:'普通授業',time:'14:30',pcol:'a'},
-  {id:'B',label:'短縮授業',time:'13:00',pcol:'b'},
-  {id:'C',label:'早帰り',  time:'12:15',pcol:'c'}
+var DEFAULT_CHILDREN = [{id:'c1',name:'お子さんの名前',emoji:'👦'}];
+var children = lsGet('v2_children') || DEFAULT_CHILDREN;
+var DEFAULT_PATS = [
+  {id:'A',label:'普通授業',time:'14:30',pcol:'a',note:''},
+  {id:'B',label:'短縮授業',time:'13:00',pcol:'b',note:''},
+  {id:'C',label:'早帰り',  time:'12:15',pcol:'c',note:''},
+  {id:'D',label:'給食なし',time:'12:00',pcol:'d',note:'弁当持参'},
+  {id:'E',label:'その他',  time:'14:00',pcol:'e',note:''}
 ];
+var pats = lsGet('v2_pats') || DEFAULT_PATS;
 var store = lsGet('v2_store') || {};
 var offset = 0;
 var editChildIdx = null, editPatIdx = null;
@@ -255,7 +268,7 @@ function renderSettings(){
     var card=document.createElement('div');
     card.className='pcard';
     card.innerHTML='<div class="pdot '+(p.pcol==='a'?'':p.pcol)+'">'+p.id+'</div>'+
-      '<div class="pinfo"><div class="plabel">'+p.label+'</div><div class="ptime">'+p.time+'</div></div>';
+      '<div class="pinfo"><div class="plabel">'+p.label+(p.note?' · '+p.note:'')+'</div><div class="ptime">'+p.time+'</div></div>';
     var btn=document.createElement('button');
     btn.className='edit-btn';
     btn.textContent='…';
@@ -378,7 +391,8 @@ function buildIcs(){
       var f=function(dt){ return dt.getFullYear()+('0'+(dt.getMonth()+1)).slice(-2)+('0'+dt.getDate()).slice(-2)+'T'+('0'+dt.getHours()).slice(-2)+('0'+dt.getMinutes()).slice(-2)+'00'; };
       var names=entries.map(function(e){return e.c.name;}).join('・');
       var label=entries[0].p.label;
-      var desc=names+' '+label+(memo?'\\n'+memo:'');
+      var patNote=entries[0].p.note||'';
+      var desc=names+' '+label+(patNote?'\\n'+patNote:'')+(memo?'\\n'+memo:'');
       ics+='BEGIN:VEVENT\r\nSUMMARY:下校 '+timeStr+'（'+names+'）\r\nDTSTART:'+f(st)+'\r\nDTEND:'+f(en)+'\r\nDESCRIPTION:'+desc+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nACTION:DISPLAY\r\nDESCRIPTION:'+names+'の下校時間です\r\nEND:VALARM\r\nEND:VEVENT\r\n';
       cnt++;
     });
@@ -387,6 +401,14 @@ function buildIcs(){
   return {ics:ics,cnt:cnt};
 }
 
+function resetSettings(){
+  openModal('reset-settings-ov');
+}
+function doResetSettings(){
+  children = DEFAULT_CHILDREN.map(function(c){return Object.assign({},c);});
+  pats = DEFAULT_PATS.map(function(p){return Object.assign({},p);});
+  persist(); closeModal('reset-settings-ov'); renderSettings();
+}
 function resetWeek(){
   openModal('reset-ov');
 }
@@ -475,6 +497,7 @@ function openPatAdd(){
   document.getElementById('pat-label').value='';
   document.getElementById('pat-time').value='14:30';
   document.getElementById('pat-del').style.display='none';
+  document.getElementById('pat-note').value='';
   document.querySelectorAll('.copt').forEach(function(o){o.classList.toggle('sel',o.classList.contains('a'));});
   openModal('pat-ov');
 }
@@ -484,16 +507,18 @@ function openPatEdit(idx){
   document.getElementById('pat-label').value=p.label;
   document.getElementById('pat-time').value=p.time;
   document.getElementById('pat-del').style.display='block';
+  document.getElementById('pat-note').value=p.note||'';
   document.querySelectorAll('.copt').forEach(function(o){o.classList.toggle('sel',o.classList.contains(p.pcol));});
   openModal('pat-ov');
 }
 function savePat(){
   var label=document.getElementById('pat-label').value.trim()||'パターン';
   var time=document.getElementById('pat-time').value||'14:30';
+  var note=document.getElementById('pat-note').value.trim();
   if(editPatIdx!==null){
-    pats[editPatIdx]={id:pats[editPatIdx].id,label:label,time:time,pcol:curPatCol};
+    pats[editPatIdx]={id:pats[editPatIdx].id,label:label,time:time,pcol:curPatCol,note:note};
   } else {
-    pats.push({id:PAT_IDS[pats.length]||'Z',label:label,time:time,pcol:curPatCol});
+    pats.push({id:PAT_IDS[pats.length]||'Z',label:label,time:time,pcol:curPatCol,note:note});
   }
   persist(); closeModal('pat-ov'); renderSettings();
 }
@@ -514,6 +539,18 @@ function closeModal(id){ document.getElementById(id).classList.remove('on'); }
 renderSettings();
 </script>
 
+</div>
+
+<!-- Reset settings confirm -->
+<div class="overlay" id="reset-settings-ov">
+  <div class="modal" style="padding:24px 20px 36px">
+    <h3 style="text-align:center;margin-bottom:8px">設定をリセット</h3>
+    <p style="text-align:center;font-size:14px;color:var(--muted);margin-bottom:24px">子供・パターンがデフォルトに戻ります</p>
+    <div class="mbtns">
+      <button class="mcancel" onclick="closeModal('reset-settings-ov')">キャンセル</button>
+      <button class="msave" style="background:#E06060" onclick="doResetSettings()">リセットする</button>
+    </div>
+  </div>
 </div>
 
 <!-- Reset confirm -->

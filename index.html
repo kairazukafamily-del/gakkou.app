@@ -210,13 +210,7 @@ function uid(){ return 'c'+Date.now()+Math.floor(Math.random()*1000); }
 
 var DEFAULT_CHILDREN = [{id:'c1',name:'こどもの名前',emoji:'👦'}];
 var children = lsGet('v2_children') || DEFAULT_CHILDREN;
-var DEFAULT_PATS = [
-  {id:'A',label:'普通授業',time:'14:30',pcol:'a',note:''},
-  {id:'B',label:'短縮授業',time:'13:00',pcol:'b',note:''},
-  {id:'C',label:'早帰り',  time:'12:15',pcol:'c',note:''},
-  {id:'D',label:'給食なし',time:'12:00',pcol:'d',note:''},
-  {id:'E',label:'その他',  time:'14:00',pcol:'e',note:''}
-];
+var DEFAULT_PATS = [];
 var pats = lsGet('v2_pats') || DEFAULT_PATS;
 var store = lsGet('v2_store') || {};
 var offset = 0;

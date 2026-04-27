@@ -266,7 +266,7 @@ function renderSettings(){
     var card=document.createElement('div');
     card.className='pcard';
     card.innerHTML='<div class="pdot '+(p.pcol==='a'?'':p.pcol)+'">'+p.id+'</div>'+
-      '<div class="pinfo"><div class="plabel">'+p.label+(p.note?' · '+p.note:'')+'</div><div class="ptime">'+zen(p.time)+'</div></div>';
+      '<div class="pinfo"><div class="plabel">'+p.label+(p.note?' · '+p.note:'')+'</div><div class="ptime">'+p.time+'</div></div>';
     var btn=document.createElement('button');
     btn.className='edit-btn';
     btn.textContent='…';

@@ -134,7 +134,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
   <div class="sec-label">こども</div>
   <div id="child-list"></div>
   <button class="add-btn" onclick="openChildAdd()">＋ 子供を追加</button>
-  <div class="sec-label">よていパターン</div>
+  <div class="sec-label">よてい</div>
   <div id="plist"></div>
   <button class="add-btn" onclick="openPatAdd()">＋ パターンを追加</button>
   <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">子どもの設定をリセット（デフォルトに戻す）</button>
@@ -161,7 +161,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
   <div class="modal">
     <h3 id="child-mtitle">子供を追加</h3>
     <label>名前</label>
-    <input type="text" id="child-name" placeholder="こどもの名前">
+    <input type="text" id="child-name" placeholder="お子様の名前">
     <label>アイコン</label>
     <div id="emoji-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
     <div class="mbtns">
@@ -208,10 +208,16 @@ function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){}
 function persist(){ lsSet('v2_children',children); lsSet('v2_pats',pats); lsSet('v2_store',store); }
 function uid(){ return 'c'+Date.now()+Math.floor(Math.random()*1000); }
 
-var DEFAULT_CHILDREN = [{id:'c1',name:'こどもの名前',emoji:'👦'}];
+var DEFAULT_CHILDREN = [
+  {id:'c1',name:'',emoji:'👦'},
+  {id:'c2',name:'',emoji:'👧'},
+  {id:'c3',name:'',emoji:'🧒'}
+];
 var children = lsGet('v2_children') || DEFAULT_CHILDREN;
 var DEFAULT_PATS = [
-  {id:'A',label:'',time:'14:30',pcol:'a',note:''}
+  {id:'A',label:'',time:'14:30',pcol:'a',note:''},
+  {id:'B',label:'',time:'13:00',pcol:'b',note:''},
+  {id:'C',label:'',time:'12:15',pcol:'c',note:''}
 ];
 var pats = lsGet('v2_pats') || DEFAULT_PATS;
 var store = lsGet('v2_store') || {};
@@ -255,7 +261,7 @@ function renderSettings(){
     var card=document.createElement('div');
     card.className='pcard';
     card.innerHTML='<div class="pdot" style="font-size:22px;background:#FFF3E8">'+c.emoji+'</div>'+
-      '<div class="pinfo"><div class="cname">'+c.name+'</div></div>';
+      '<div class="pinfo"><div class="cname" style="'+(c.name?'':'color:var(--placeholder)')+'">'+( c.name||'お子様の名前')+'</div></div>';
     var btn=document.createElement('button');
     btn.className='edit-btn';
     btn.textContent='…';
@@ -270,7 +276,7 @@ function renderSettings(){
     var card=document.createElement('div');
     card.className='pcard';
     card.innerHTML='<div class="pdot '+(p.pcol==='a'?'':p.pcol)+'">'+p.id+'</div>'+
-      '<div class="pinfo"><div class="plabel">'+p.label+(p.note?' · '+p.note:'')+'</div><div class="ptime">'+p.time+'</div></div>';
+      '<div class="pinfo"><div class="plabel" style="'+(p.label?'':'color:var(--placeholder)')+'">'+( p.label||'ラベル未設定')+(p.note?' · '+p.note:'')+'</div><div class="ptime">'+p.time+'</div></div>';
     var btn=document.createElement('button');
     btn.className='edit-btn';
     btn.textContent='…';
@@ -479,7 +485,7 @@ function openChildEdit(idx){
   openModal('child-ov');
 }
 function saveChild(){
-  var name=document.getElementById('child-name').value.trim()||'こどもの名前';
+  var name=document.getElementById('child-name').value.trim()||'';
   if(editChildIdx!==null){
     children[editChildIdx]={id:children[editChildIdx].id,name:name,emoji:curEmoji};
   } else {

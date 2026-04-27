@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="下校カレンダー">
-<title>下校カレンダー</title>
+<meta name="apple-mobile-web-app-title" content="げこうかれんだー">
+<title>げこうかれんだー</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
@@ -113,7 +113,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 <body>
 
 <div class="header">
-  <h1>下校カレンダー</h1>
+  <h1>げこうかれんだー</h1>
 </div>
 
 <div class="tabnav">
@@ -123,13 +123,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 
 <!-- Settings -->
 <div id="s0" class="screen on">
-  <div class="sec-label">子供</div>
+  <div class="sec-label">こども</div>
   <div id="child-list"></div>
   <button class="add-btn" onclick="openChildAdd()">＋ 子供を追加</button>
-  <div class="sec-label">下校パターン</div>
+  <div class="sec-label">げこうパターン</div>
   <div id="plist"></div>
   <button class="add-btn" onclick="openPatAdd()">＋ パターンを追加</button>
-  <p class="hint" style="margin-top:16px">最初に一度だけ設定すればOK</p>
   <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">子供の設定をリセット（デフォルトに戻す）</button>
 </div>
 
@@ -153,7 +152,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
   <div class="modal">
     <h3 id="child-mtitle">子供を追加</h3>
     <label>名前</label>
-    <input type="text" id="child-name" placeholder="例：たろう">
+    <input type="text" id="child-name" placeholder="こどもの名前">
     <label>アイコン</label>
     <div id="emoji-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
     <div class="mbtns">
@@ -191,7 +190,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 </div>
 
 <script>
-var DAYS_LABEL = ['月曜日','火曜日','水曜日','木曜日','金曜日'];
+var DAYS_LABEL = ['げつようび','かようび','すいようび','もくようび','きんようび'];
 var DKEYS = ['mon','tue','wed','thu','fri'];
 var PAT_IDS = 'ABCDEFGH';
 
@@ -200,7 +199,7 @@ function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){}
 function persist(){ lsSet('v2_children',children); lsSet('v2_pats',pats); lsSet('v2_store',store); }
 function uid(){ return 'c'+Date.now()+Math.floor(Math.random()*1000); }
 
-var DEFAULT_CHILDREN = [{id:'c1',name:'お子さんの名前',emoji:'👦'}];
+var DEFAULT_CHILDREN = [{id:'c1',name:'こどもの名前',emoji:'👦'}];
 var children = lsGet('v2_children') || DEFAULT_CHILDREN;
 var DEFAULT_PATS = [
   {id:'A',label:'普通授業',time:'14:30',pcol:'a',note:''},

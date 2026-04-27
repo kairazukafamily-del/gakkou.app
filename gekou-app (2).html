@@ -105,6 +105,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 .mcancel { flex: 1; padding: 14px; border-radius: 14px; background: var(--bg); border: 1.5px solid var(--border); font-size: 15px; color: var(--muted); cursor: pointer; }
 .msave { flex: 2; padding: 14px; border-radius: 14px; background: var(--accent); border: none; font-size: 15px; color: #fff; font-weight: 700; cursor: pointer; }
 .mdel { width: 100%; padding: 13px; border-radius: 14px; background: none; border: 1.5px solid #F0D0D0; color: #C06060; font-size: 14px; cursor: pointer; margin-top: 10px; }
+
+/* Calendar picker */
+.cal-sheet { background: var(--card); width: 100%; max-width: 480px; border-radius: 24px 24px 0 0; padding: 20px 20px 44px; }
+.cal-sheet h3 { font-size: 15px; font-weight: 600; color: var(--muted); text-align: center; margin-bottom: 16px; }
+.cal-btn { width: 100%; padding: 16px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); font-size: 16px; font-weight: 600; color: var(--text); cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+.cal-btn:active { background: var(--border); }
+.cal-btn span { font-size: 24px; }
+.cal-cancel { width: 100%; padding: 14px; border-radius: 16px; border: none; background: none; font-size: 15px; color: var(--muted); cursor: pointer; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -365,15 +373,12 @@ function copyPrev(){
   }
 }
 
-function sendCal(){
-  var btn=document.getElementById('sendbtn');
+function buildIcs(){
   var d=wd(), mon=getMon(offset);
   var ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//下校タイマー//JP\r\nCALSCALE:GREGORIAN\r\n';
   var cnt=0;
-
   DKEYS.forEach(function(dkey,di){
     var memo=d.memo[dkey]||'';
-    // collect all children's times for this day, group by time
     var byTime={};
     children.forEach(function(c){
       var pid=d.sel[c.id]?d.sel[c.id][dkey]:null; if(!pid) return;
@@ -381,7 +386,6 @@ function sendCal(){
       if(!byTime[p.time]) byTime[p.time]=[];
       byTime[p.time].push({c:c,p:p});
     });
-
     Object.keys(byTime).forEach(function(timeStr){
       var entries=byTime[timeStr];
       var date=new Date(mon); date.setDate(mon.getDate()+di);
@@ -392,20 +396,40 @@ function sendCal(){
       var names=entries.map(function(e){return e.c.name;}).join('・');
       var label=entries[0].p.label;
       var desc=names+' '+label+(memo?'\\n'+memo:'');
-      var notifDesc=names+'の下校時間です';
-      ics+='BEGIN:VEVENT\r\nSUMMARY:下校 '+timeStr+'（'+names+'）\r\nDTSTART:'+f(st)+'\r\nDTEND:'+f(en)+'\r\nDESCRIPTION:'+desc+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nACTION:DISPLAY\r\nDESCRIPTION:'+notifDesc+'\r\nEND:VALARM\r\nEND:VEVENT\r\n';
+      ics+='BEGIN:VEVENT\r\nSUMMARY:下校 '+timeStr+'（'+names+'）\r\nDTSTART:'+f(st)+'\r\nDTEND:'+f(en)+'\r\nDESCRIPTION:'+desc+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nACTION:DISPLAY\r\nDESCRIPTION:'+names+'の下校時間です\r\nEND:VALARM\r\nEND:VEVENT\r\n';
       cnt++;
     });
   });
-
   ics+='END:VCALENDAR';
-  if(cnt===0){
+  return {ics:ics,cnt:cnt};
+}
+
+function sendCal(){
+  var result=buildIcs();
+  if(result.cnt===0){
+    var btn=document.getElementById('sendbtn');
     btn.textContent='入力してください';
     setTimeout(function(){btn.textContent='カレンダーへ一括送る';},2000);
     return;
   }
-  window.location.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
-  btn.textContent=cnt+'件 送信しました！'; btn.classList.add('ok');
+  openModal('cal-ov');
+}
+
+function doSend(type){
+  closeModal('cal-ov');
+  var result=buildIcs();
+  var btn=document.getElementById('sendbtn');
+  if(type==='apple'){
+    window.location.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(result.ics);
+  } else {
+    // Google: download .ics file (then import in Google Calendar)
+    var blob=new Blob([result.ics],{type:'text/calendar;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download='下校時間.ics'; a.click();
+    URL.revokeObjectURL(url);
+  }
+  btn.textContent=result.cnt+'件 送信しました！'; btn.classList.add('ok');
   setTimeout(function(){btn.textContent='カレンダーへ一括送る';btn.classList.remove('ok');},3000);
 }
 
@@ -508,5 +532,15 @@ function closeModal(id){ document.getElementById(id).classList.remove('on'); }
 // Init
 renderSettings();
 </script>
+
+<!-- Calendar picker -->
+<div class="overlay" id="cal-ov">
+  <div class="cal-sheet">
+    <h3>カレンダーを選んでください</h3>
+    <button class="cal-btn" onclick="doSend('apple')"><span>🍎</span> iPhoneカレンダー</button>
+    <button class="cal-btn" onclick="doSend('google')"><span>📅</span> Googleカレンダー</button>
+    <button class="cal-cancel" onclick="closeModal('cal-ov')">キャンセル</button>
+  </div>
+</div>
 </body>
 </html>

@@ -48,6 +48,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 .pdot { width: 44px; height: 44px; border-radius: 13px; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
 .pdot.b { background: var(--mint-light); color: #0F6E56; }
 .pdot.c { background: var(--amber-light); color: #854F0B; }
+.pdot.d { background: var(--purple-light); color: #6040A0; }
+.pdot.e { background: var(--pink-light); color: #A04060; }
 .pinfo { flex: 1; }
 .plabel { font-size: 11px; color: var(--muted); }
 .ptime { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-top: 1px; }
@@ -85,8 +87,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 .chip.ond { background: var(--purple-light); border-color: var(--purple); color: #6040A0; font-weight: 600; }
 .chip.one { background: var(--pink-light); border-color: var(--pink); color: #A04060; font-weight: 600; }
 
-.memo { width: 100%; border: none; background: transparent; font-size: 13px; color: #8A7A74; outline: none; padding: 9px 0 1px; margin-top: 8px; border-top: 1px dashed var(--border); font-family: inherit; }
-.memo::placeholder { color: var(--placeholder); }
 
 .reset-btn { width:100%; font-size:12px; color:var(--muted); background:none; border:none; padding:4px; cursor:pointer; margin-bottom:10px; }
 .sendbtn { width: 100%; padding: 17px; background: var(--accent); color: #FFFFFF; border: none; border-radius: 18px; font-size: 16px; font-weight: 700; cursor: pointer; display: block; margin-top: 4px; }
@@ -107,6 +107,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 .copt.a { background: var(--accent-light); color: var(--accent); }
 .copt.b { background: var(--mint-light); color: #0F6E56; }
 .copt.c { background: var(--amber-light); color: #854F0B; }
+.copt.d { background: var(--purple-light); color: #6040A0; }
+.copt.e { background: var(--pink-light); color: #A04060; }
 .copt.sel { border-color: currentColor; }
 .mbtns { display: flex; gap: 10px; }
 .mcancel { flex: 1; padding: 14px; border-radius: 14px; background: var(--bg); border: 1.5px solid var(--border); font-size: 15px; color: var(--muted); cursor: pointer; }
@@ -184,7 +186,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
       <div class="copt d" onclick="selPatCol('d',this)">D</div>
       <div class="copt e" onclick="selPatCol('e',this)">E</div>
     </div>
-    <label>カレンダー備考（任意）</label>
+    <label>備考（任意）</label>
     <input type="text" id="pat-note" placeholder="例：給食なし、弁当持参">
     <div class="mbtns">
       <button class="mcancel" onclick="closeModal('pat-ov')">キャンセル</button>
@@ -359,17 +361,7 @@ function renderWeek(){
       row.appendChild(crow);
     });
 
-    // memo
-    var memoEl=document.createElement('input');
-    memoEl.className='memo';
-    memoEl.type='text';
-    memoEl.placeholder='メモ（任意）';
-    memoEl.value=d.memo[dkey]||'';
-    memoEl.addEventListener('input',function(){
-      wd().memo[dkey]=memoEl.value;
-      persist();
-    });
-    row.appendChild(memoEl);
+
     cont.appendChild(row);
   });
 }

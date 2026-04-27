@@ -388,7 +388,8 @@ function buildIcs(){
       var label=entries[0].p.label;
       var patNote=entries[0].p.note||'';
       var desc=names+' '+label+(patNote?'\\n'+patNote:'')+(memo?'\\n'+memo:'');
-      ics+='BEGIN:VEVENT\r\nSUMMARY:下校 '+timeStr+'（'+names+'）\r\nDTSTART:'+f(st)+'\r\nDTEND:'+f(en)+'\r\nDESCRIPTION:'+desc+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nACTION:DISPLAY\r\nDESCRIPTION:'+names+'の下校時間です\r\nEND:VALARM\r\nEND:VEVENT\r\n';
+      var uid='yotei-'+entries.map(function(e){return e.c.id;}).join('-')+'-'+dkey+'-w'+offset+'@yotei-cal';
+      ics+='BEGIN:VEVENT\r\nUID:'+uid+'\r\nSUMMARY:下校 '+timeStr+'（'+names+'）\r\nDTSTART:'+f(st)+'\r\nDTEND:'+f(en)+'\r\nDESCRIPTION:'+desc+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nACTION:DISPLAY\r\nDESCRIPTION:'+names+'の下校時間です\r\nEND:VALARM\r\nEND:VEVENT\r\n';
       cnt++;
     });
   });

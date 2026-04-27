@@ -134,10 +134,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
   <div class="sec-label">こども</div>
   <div id="child-list"></div>
   <button class="add-btn" onclick="openChildAdd()">＋ 子供を追加</button>
-  <div class="sec-label">げこうパターン</div>
+  <div class="sec-label">よていパターン</div>
   <div id="plist"></div>
   <button class="add-btn" onclick="openPatAdd()">＋ パターンを追加</button>
-  <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">こどもの設定をリセット（デフォルトに戻す）</button>
+  <button class="reset-btn" style="margin-top:16px;color:#C06060;" onclick="resetSettings()">子どもの設定をリセット（デフォルトに戻す）</button>
   <button class="reset-btn" style="margin-top:8px;color:#C06060;" onclick="resetAll()">全データをリセット</button>
 </div>
 
@@ -556,7 +556,7 @@ renderSettings();
 <div class="overlay" id="reset-all-ov">
   <div class="modal" style="padding:24px 20px 36px">
     <h3 style="text-align:center;margin-bottom:8px">全データをリセット</h3>
-    <p style="text-align:center;font-size:14px;color:var(--muted);margin-bottom:24px">こどもの設定・パターン・すべての週の入力が消えます。元に戻せません。</p>
+    <p style="text-align:center;font-size:14px;color:#C06060;margin-bottom:24px">子どもの設定・パターン・すべての週の入力が消えます。元に戻せません。</p>
     <div class="mbtns">
       <button class="mcancel" onclick="closeModal('reset-all-ov')">キャンセル</button>
       <button class="msave" style="background:#E06060" onclick="doResetAll()">全部消す</button>
@@ -568,7 +568,7 @@ renderSettings();
 <div class="overlay" id="reset-settings-ov">
   <div class="modal" style="padding:24px 20px 36px">
     <h3 style="text-align:center;margin-bottom:8px">設定をリセット</h3>
-    <p style="text-align:center;font-size:14px;color:var(--muted);margin-bottom:24px">子供・パターンがデフォルトに戻ります</p>
+    <p style="text-align:center;font-size:14px;color:#C06060;margin-bottom:24px">子供・パターンがデフォルトに戻ります</p>
     <div class="mbtns">
       <button class="mcancel" onclick="closeModal('reset-settings-ov')">キャンセル</button>
       <button class="msave" style="background:#E06060" onclick="doResetSettings()">リセットする</button>
